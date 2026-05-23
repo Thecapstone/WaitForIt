@@ -6,7 +6,7 @@ class CookieJWTAuthentication(JWTAuthentication):
         token = request.COOKIES.get("access_token")
 
         if not token:
-            return None
+            return super().authenticate(request)
         try:
             validated_token = self.get_validated_token(token)
         except AuthenticationFailed as e:
