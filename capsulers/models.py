@@ -1,9 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.urls import reverse
 from django.contrib.auth.models import AbstractUser
 from capsulers.managers import UserManager
 from django.utils.translation import gettext_lazy as _
+import auto_prefetch
 
 # Create your models here.
 
@@ -32,19 +32,3 @@ class User(AbstractUser):
     
    
     objects = UserManager()
-    
-    
-
-
-
-
-
-class Profile(models.Model):
-    name = models.CharField(max_length=100)
-    avatar = models.ImageField()
-    email = models.EmailField(unique=True)
-
-
-class Contributors(models.Model):
-    members = models.ForeignKey('capsulers.User', on_delete=models.CASCADE, related_name='contributor')
-    capsules = models.ManyToManyField('memories.Capsule', related_name='memories_contributed')

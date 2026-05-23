@@ -10,6 +10,9 @@ router = routers.SimpleRouter()
 router.register(r'memories', CapsuleViewSet, basename='memories')
 router.register(r'users', UserViewSet, basename='users')
 router.register(r'auth', AuthViewSet, basename='auth')
-router.register(r'health', HealthCheckView, basename='health')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('health', HealthCheckView.as_view(), name='health-check'),
+]
+
+urlpatterns += router.urls
