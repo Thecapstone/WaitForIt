@@ -1,28 +1,33 @@
 from django import forms
 from django.db import models
+from datetime import (
+    timedelta
+)
+from helpers.models import UniqueUserId
+from django.utils import timezone
 from typing import TYPE_CHECKING
 
-class Capsule(models.Model):
+
+def get_default_expiry():
+        return timezone.now() + timedelta(days=1)
+
+class Capsule(UniqueUserId):
     title = models.CharField(max_length=224)
+    description = models.CharField(max_length=220, null=True, blank=True)
     creator = models.ForeignKey('capsulers.User', on_delete=models.CASCADE, related_name='created_capsules')
-    teasers = models.FileField(upload_to='teasers/', null=True, blank=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
-    image_alt_text = models.CharField(max_length=220, null=True, blank=True)
-    video = models.FileField(upload_to='videos/', null=True, blank=True)
-    video_alt_text = models.CharField(max_length=220, null=True, blank=True)
-    audio = models.FileField(upload_to='audio/', null=True, blank=True)
-    audio_alt_text = models.CharField(max_length=220, null=True, blank=True)
-    description = models.CharField(null=True, blank=True)
-    members = models.ManyToManyField('capsulers.User', related_name='joined_capsules', blank=True)
+    log = models.TextField(blank=True)
+    member = models.ManyToManyField('capsulers.User', related_name='capsules_joined', blank=True)
+    contributor = models.ManyToManyField('capsulers.User', related_name='capsules_contributed_to', blank=True)
     private = models.BooleanField(default=True)
-   
-
+    maturity_date = models.DateTimeField(default=get_default_expiry, help_text="Time to open capsule")
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     @property
     def is_private(self):
-        if self.private:
+        return self.private
+    
+    def is_open(self):
+        if self.maturity_date <= timezone.now():
             return True
         return False
 
@@ -30,7 +35,23 @@ class Capsule(models.Model):
         return f"{self.title} is a private: {self.is_private}, capsule"  
 
 
+class Videos(UniqueUserId):
+    capsule = models.ForeignKey('memories.Capsule', on_delete=models.CASCADE)
+    video_title = models.CharField(max_length=100)
+    video_file = models.URLField(max_length=512, blank=True)
+    teaser = models.BooleanField(default=False)
 
-class WaitList(models.Model):
-    inviter = models.ForeignKey('memories.Capsule', on_delete=models.CASCADE, related_name='invites')
-    recipient = models.ForeignKey('capsulers.User', on_delete=models.CASCADE, related_name='on_waitlist')
+    @property
+    def use_for_teaser_generation(self):
+        return bool(self.teaser)
+        
+class Images(UniqueUserId):
+    capsule = models.ForeignKey('memories.Capsule', on_delete=models.CASCADE)
+    image_title = models.CharField(max_length=100)
+    image_file = models.URLField(max_length=512, blank=True)
+
+
+class Teasers(UniqueUserId):
+    video = models.ForeignKey('memories.Videos', on_delete=models.DO_NOTHING, related_name='preview')
+    capsule = models.ForeignKey('memories.Capsule', on_delete=models.CASCADE, related_name='capsule_previews')
+    teaser_url = models.URLField(max_length=512, blank=True)
