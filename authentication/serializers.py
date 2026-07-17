@@ -1,10 +1,41 @@
 """Serializers for user registration, authentication, and password management."""
 
+import datetime
+import os
+
+import jwt
+import timedelta
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from authentication.models import User as user_db
+
+EMAIL_SECRET_KEY = os.getenv("Email_Key")
+ALGORITHM = "HS256"
+
+
+def generate_verification_token(user_id):
+    """Generate a unique token for email verification."""
+    payload = {
+        "user_id": user_id,
+        "type": "email_verification",
+        "exp": datetime.utcnow() + timedelta(hours=24),
+    }
+    return jwt.encode(payload, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_verification_token(token):
+    """Verify user account using email token"""
+    try:
+        payload = jwt.decode(token, EMAIL_SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "email_verification":
+            raise serializers.ValidationError("Invalid token type.")
+        return payload["user_id"]
+    except jwt.ExpiredSignatureError:
+        raise serializers.ValidationError("Token has expired.")
+    except jwt.InvalidTokenError:
+        raise serializers.ValidationError("Invalid token.")
 
 
 class UserCreateSerializer(ModelSerializer):
@@ -29,14 +60,14 @@ class UserCreateSerializer(ModelSerializer):
             password=validated_data["password"],
             is_active=False,
         )
-        token = default_token_generator.make_token(user.email)
+        token = generate_verification_token(user.id)
 
         # Send Email
         verification_link = f"http://localhost:8000/authentication/verify/{user.id}/{token}/"
         send_mail(
             subject="Verify your account",
             message=f"Click the link to verify: {verification_link}",
-            from_email="noreply@yourdomain.com",
+            from_email="noreply@wait_for_it.com",
             recipient_list=[user.email],
         )
         return user
@@ -81,12 +112,6 @@ class UserLoginSerializer(Serializer):
             attrs["user"] = user
             return attrs
         raise serializers.ValidationError("Invalid credentials")
-
-
-class EmailVerificationSerializer(Serializer):
-    """Serializer for email verification, validates the provided token."""
-
-    token = serializers.CharField(max_length=555)
 
 
 class ForgotPasswordSerializer(Serializer):
