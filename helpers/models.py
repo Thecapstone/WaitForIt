@@ -38,20 +38,19 @@ class TimeBasedModel(auto_prefetch.Model):
 
 
 class UniqueUserId(TimeBasedModel):
-    id=models.CharField(
+    id = models.CharField(
         primary_key=True,
         default=generate_unique_id,
-        help_text='unique id generator for anonymous usernames',
+        help_text="unique id generator for anonymous usernames",
         editable=False,
         serialize=False,
-        unique=True
+        unique=True,
     )
-    created_at=models.DateTimeField(auto_now_add=True)
-    visible=models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    visible = models.BooleanField(default=True)
 
     class Meta(auto_prefetch.Model.Meta):
-        abstract=True
+        abstract = True
 
     def __str__(self):
         return self.id
-    

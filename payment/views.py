@@ -12,16 +12,16 @@ def initiate_payment(request):
         "merchant_code": settings.INTERSWITCH_MERCHANT_CODE,
         "pay_item_id": settings.INTERSWITCH_PAY_ITEM_ID,
         "txn_ref": txn_ref,
-        "amount": 200000, #(amt in minor)
-        "currency": 566, #(NGN)
-        "redirect_url": "http://127.0.0.1:8000/payment/callback/"
-
+        "amount": 200000,  # (amt in minor)
+        "currency": 566,  # (NGN)
+        "redirect_url": "http://127.0.0.1:8000/payment/callback/",
     }
     return render(request, "payment.html", context)
 
+
 def payment_callback(request):
     txn_ref = request.GET.get("txn_ref")
-    amount = request.GET.get('amount')
+    amount = request.GET.get("amount")
 
     verification_url = f"https:qa.interswitchng.com/collections/api/v1/gettransaction.json?merchantcode={settings.INTERSWITCH_MERCHANT_CODE}&transactionreference={txn_ref}&amount={amount}"
 

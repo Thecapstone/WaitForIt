@@ -1,6 +1,7 @@
 from django.db import models
 from capsulers.models import User
 
+
 class UserSubscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     txn_ref = models.CharField(max_length=200)
