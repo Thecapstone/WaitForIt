@@ -25,7 +25,9 @@ class User(AbstractUser):
     password = models.TextField(_("password"), unique=True)
 
     is_active = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
     last_login = models.DateTimeField(_("last login"), blank=True, null=True)
+    last_login_ip = models.CharField(max_length=30)
     is_premium = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"

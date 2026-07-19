@@ -13,12 +13,20 @@ def get_default_expiry():
 class Capsule(UniqueUserId):
     title = models.CharField(max_length=224)
     description = models.CharField(max_length=220, null=True, blank=True)
-    creator = models.ForeignKey("capsulers.User", on_delete=models.CASCADE, related_name="created_capsules")
+    creator = models.ForeignKey(
+        "capsulers.User", on_delete=models.CASCADE, related_name="created_capsules"
+    )
     log = models.TextField(blank=True)
-    member = models.ManyToManyField("capsulers.User", related_name="capsules_joined", blank=True)
-    contributor = models.ManyToManyField("capsulers.User", related_name="capsules_contributed_to", blank=True)
+    member = models.ManyToManyField(
+        "capsulers.User", related_name="capsules_joined", blank=True
+    )
+    contributor = models.ManyToManyField(
+        "capsulers.User", related_name="capsules_contributed_to", blank=True
+    )
     private = models.BooleanField(default=True)
-    maturity_date = models.DateTimeField(default=get_default_expiry, help_text="Time to open capsule")
+    maturity_date = models.DateTimeField(
+        default=get_default_expiry, help_text="Time to open capsule"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -52,6 +60,10 @@ class Images(UniqueUserId):
 
 
 class Teasers(UniqueUserId):
-    video = models.ForeignKey("memories.Videos", on_delete=models.DO_NOTHING, related_name="preview")
-    capsule = models.ForeignKey("memories.Capsule", on_delete=models.CASCADE, related_name="capsule_previews")
+    video = models.ForeignKey(
+        "memories.Videos", on_delete=models.DO_NOTHING, related_name="preview"
+    )
+    capsule = models.ForeignKey(
+        "memories.Capsule", on_delete=models.CASCADE, related_name="capsule_previews"
+    )
     teaser_url = models.URLField(max_length=512, blank=True)
