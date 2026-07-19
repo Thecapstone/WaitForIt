@@ -46,6 +46,7 @@ dependencies = [
     "requests==2.32.5",
     "requests-oauthlib==2.0.0",
     "rpds-py==0.30.0",
+    "ruff>=0.15.22",
     "social-auth-app-django==5.7.0",
     "social-auth-core==4.8.5",
     "sqlparse==0.5.5",
@@ -58,20 +59,52 @@ dependencies = [
 
 
 [tool.ruff]
-line-length = 120
-exclude = [
-    ".git",
-    ".venv",
-    "__pycache__",
-    "*/migrations/*",
-]
+# Target Python version
+target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+# Core rules for a robust FastAPI project
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort (auto-sorts imports)
+    "B",    # flake8-bugbear (catches common bugs)
+    "UP",   # pyupgrade (forces modern Python syntax)
+    "FAST", # FastAPI-specific rules (e.g., FAST001, FAST002)
+    "RUF",  # Ruff-specific rules (includes Pydantic typing & mutable defaults checks)
+]
 
-[tool.ruff.lint.per-file-ignores]
-"*/migrations/*.py" = ["E501"]
+ignore = []
+
+[tool.ruff.lint.isort]
+# Combines multiple imports from the same module onto a single line
+combine-as-imports = true
 
 [tool.ruff.format]
+# Enable standard formatting preferences
 quote-style = "double"
 indent-style = "space"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.pytest.ini_options]
+# Automatically append coverage parameters whenever "uv run pytest" is executed
+addopts = "--cov=. --cov-report=term-missing --cov-report=html"
+pythonpath = ["."]
+
+[tool.coverage.run]
+# Ignore your testing files and virtual environment folder when calculating coverage
+omit = [
+    "tests/*",
+    ".venv/*",
+    "main.py", # optional: skip main entry point if it's just app initialization
+]
+
+[tool.coverage.report]
+# Fail the test suite if total coverage drops under a specific threshold (e.g., 80%)
+fail_under = 80
