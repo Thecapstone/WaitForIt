@@ -5,6 +5,7 @@ import hashlib
 import os
 from uuid import uuid4
 
+from django.utils import timezone
 from ipware import get_client_ip
 import jwt
 from rest_framework import permissions
@@ -72,9 +73,9 @@ class HasBootstrapToken(permissions.BasePermission):
 
 def session_token(user_id: int, role: str, session_version: int, request) -> str:
     """Build and hash a tracking payload tracking user session versions."""
+    ip_address, _ = get_client_ip(request)
+    user_agent = request.META.get("HTTP_USER_AGENT", "")
     active_devices = create_user_agent(user_agent, ip_address)
-    _ip_address, _ = get_client_ip(request)
-    request.META.get("HTTP_USER_AGENT", "")
     hashlib.sha256(uuid4().bytes).hexdigest()
     payload = {
         "user_id": user_id,
@@ -114,10 +115,10 @@ def access_token(session_token: str) -> str:
         # 4. Sign and return the new access token
         return jwt.encode(access_payload, ACCESS_SECRET, algorithm=ALGORITHM)
 
-    except jwt.ExpiredSignatureError:
-        raise ValueError("Session token has expired. Please log in again.")
-    except jwt.InvalidTokenError:
-        raise ValueError("Invalid session token.")
+    except jwt.ExpiredSignatureError as err:
+        raise ValueError("Session token has expired. Please log in again.") from err
+    except jwt.InvalidTokenError as err:
+        raise ValueError("Invalid session token.") from err
 
 
 def generate_token(user_id, exp, token_type) -> str:
@@ -160,13 +161,10 @@ def verify_verification_token(token) -> str:
         if payload.get("type") != "email_verification":
             raise ValueError("Invalid token type.")
         return payload["user_id"]
-    except jwt.ExpiredSignatureError:
-        raise ValueError("Token has expired.")
-    except jwt.InvalidTokenError:
-        raise ValueError("Invalid token.")
-
-
-from django.utils import timezone
+    except jwt.ExpiredSignatureError as err:
+        raise ValueError("Token has expired.") from err
+    except jwt.InvalidTokenError as err:
+        raise ValueError("Invalid token.") from err
 
 
 def verify_password_reset_token(token) -> user_db:
@@ -197,8 +195,8 @@ def verify_password_reset_token(token) -> user_db:
 
         return reset_token.user
 
-    except PasswordResetToken.DoesNotExist:
-        raise ValueError("Invalid password reset token.")
+    except PasswordResetToken.DoesNotExist as err:
+        raise ValueError("Invalid password reset token.") from err
 
     except jwt.ExpiredSignatureError as err:
         raise ValueError("Reset link has expired.") from err

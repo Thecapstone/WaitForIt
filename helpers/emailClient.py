@@ -4,16 +4,16 @@ import os
 import smtplib
 import ssl
 
-sender_email = os.getenv("EMAIL_ADDRESS")
-sender_password = os.getenv("EMAIL_PASSWORD")
+sender_mail = os.getenv("EMAIL_ADDRESS")
+sender_pass = os.getenv("EMAIL_PASSWORD")
 
 
 def send_verification_email(receiver_email, verification_link, verification_token):
     # 1. Configuration settings
     smtp_server = "smtp.gmail.com"
     port = 465  # SSL standard port
-    sender_email = sender_email
-    sender_password = sender_password
+    sender_email = sender_mail
+    sender_password = sender_pass
 
     # 3. Create the multi-part email container
     message = MIMEMultipart("alternative")
@@ -55,8 +55,8 @@ def send_password_reset_email(receiver_email, reset_link, reset_token):
     # 1. Configuration settings
     smtp_server = "smtp.gmail.com"
     port = 465  # SSL standard port
-    sender_email = sender_email
-    sender_password = sender_password
+    sender_email = sender_mail
+    sender_password = sender_pass
 
     # 3. Create the multi-part email container
     message = MIMEMultipart("alternative")

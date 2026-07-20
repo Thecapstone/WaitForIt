@@ -25,7 +25,6 @@ from authentication.serializers import (
     PasswordResetSerializer,
     UserCreateSerializer,
     UserLoginSerializer,
-    verify_verification_token,
 )
 from authentication.tokens import (
     HasBootstrapToken,
