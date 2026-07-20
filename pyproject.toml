@@ -12,9 +12,9 @@ dependencies = [
     "cffi==2.0.0",
     "charset-normalizer==3.4.6",
     "cloudinary>=1.45.0",
-    "cryptography==46.0.5",
+    "cryptography==48.0.1",
     "defusedxml==0.7.1",
-    "django==6.0.3",
+    "django==6.0.7",
     "django-allauth==65.15.0",
     "django-auto-prefetch==1.14.0",
     "django-cors-headers==4.9.0",
@@ -28,22 +28,22 @@ dependencies = [
     "drf-spectacular==0.29.0",
     "drf-spectacular-sidecar==2026.3.1",
     "gunicorn==25.2.0",
-    "idna==3.11",
+    "idna==3.15",
     "inflection==0.5.1",
     "jsonschema==4.26.0",
     "jsonschema-specifications==2025.9.1",
     "moviepy>=1.0.3",
     "oauthlib==3.3.1",
     "packaging==26.0",
-    "pillow==12.1.1",
+    "pillow==12.3.0",
     "pre-commit>=4.6.0",
     "pycparser==3.0",
-    "pyjwt==2.12.1",
+    "pyjwt==2.13.0",
     "python3-openid==3.2.0",
     "pyyaml==6.0.3",
     "redis>=8.0.1",
     "referencing==0.37.0",
-    "requests==2.32.5",
+    "requests==2.33.0",
     "requests-oauthlib==2.0.0",
     "rpds-py==0.30.0",
     "ruff>=0.15.22",
@@ -52,7 +52,7 @@ dependencies = [
     "sqlparse==0.5.5",
     "tzdata==2025.3",
     "uritemplate==4.2.0",
-    "urllib3==2.6.3",
+    "urllib3==2.7.0",
     "user-agents>=2.2.0",
     "whitenoise==6.12.0",
 ]
@@ -78,6 +78,7 @@ select = [
 
 ignore = [
     "RUF012",
+    "E501"
 ]
 
 [tool.ruff.lint.isort]
@@ -105,6 +106,7 @@ pythonpath = ["."]
 "**/serializers.py" = ["RUF012"]
 "**/views.py" = ["RUF012"]
 "**/models.py" = ["RUF012"]
+"**/migrations/*.py" = ["E501"]
 
 [tool.coverage.report]
 # Fail the test suite if total coverage drops under a specific threshold (e.g., 80%)
