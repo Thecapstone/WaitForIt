@@ -1,14 +1,14 @@
 import os
-import tempfile
 from pathlib import Path
+import tempfile
 
-import cloudinary.utils
-import moviepy.Clip as VideoFileClip
 from cloudinary.uploader import (
     destroy as delete_from_cloudinary,
     upload as upload_to_cloudinary,
 )
+import cloudinary.utils
 from django.db import transaction
+import moviepy.Clip as VideoFileClip
 from rest_framework import serializers
 
 from memories.models import Capsule, Images, Teasers, Videos
@@ -124,12 +124,10 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
                         resource_type="video",
                         folder="capsule_videos",
                     )
-                    uploaded_resources.append(
-                        {
-                            "public_id": video_upload.get("public_id"),
-                            "resource_type": "video",
-                        }
-                    )
+                    uploaded_resources.append({
+                        "public_id": video_upload.get("public_id"),
+                        "resource_type": "video",
+                    })
 
                     video_url = video_upload.get("secure_url") or video_upload.get(
                         "url"
@@ -149,12 +147,10 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
                         teaser_upload = _upload_cloudinary_resource(
                             teaser_path, resource_type="video", folder="capsule_teasers"
                         )
-                        uploaded_resources.append(
-                            {
-                                "public_id": teaser_upload.get("public_id"),
-                                "resource_type": "video",
-                            }
-                        )
+                        uploaded_resources.append({
+                            "public_id": teaser_upload.get("public_id"),
+                            "resource_type": "video",
+                        })
 
                         Teasers.objects.create(
                             video=video_obj,
@@ -172,12 +168,10 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
                         resource_type="image",
                         folder="capsule_images",
                     )
-                    uploaded_resources.append(
-                        {
-                            "public_id": image_upload.get("public_id"),
-                            "resource_type": "image",
-                        }
-                    )
+                    uploaded_resources.append({
+                        "public_id": image_upload.get("public_id"),
+                        "resource_type": "image",
+                    })
 
                     image_url = image_upload.get("secure_url") or image_upload.get(
                         "url"

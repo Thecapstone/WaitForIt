@@ -5,8 +5,8 @@ import hashlib
 import os
 from uuid import uuid4
 
-import jwt
 from ipware import get_client_ip
+import jwt
 from rest_framework import permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
@@ -73,9 +73,9 @@ class HasBootstrapToken(permissions.BasePermission):
 def session_token(user_id: int, role: str, session_version: int, request) -> str:
     """Build and hash a tracking payload tracking user session versions."""
     active_devices = create_user_agent(user_agent, ip_address)
-    ip_address, _ = get_client_ip(request)
-    user_agent = request.META.get("HTTP_USER_AGENT", "")
-    fingerprint = hashlib.sha256(uuid4().bytes).hexdigest()
+    _ip_address, _ = get_client_ip(request)
+    request.META.get("HTTP_USER_AGENT", "")
+    hashlib.sha256(uuid4().bytes).hexdigest()
     payload = {
         "user_id": user_id,
         "role": role,

@@ -1,6 +1,6 @@
-import rest_framework.status as status
 from rest_framework.decorators import throttle_classes
 from rest_framework.response import Response
+import rest_framework.status as status
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import ModelViewSet
 

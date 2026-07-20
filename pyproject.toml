@@ -21,7 +21,6 @@ dependencies = [
     "django-environ>=0.14.0",
     "django-extensions==4.1",
     "django-ipware>=7.0.1",
-    "django-rest-framework==0.1.0",
     "django-widget-tweaks==1.5.1",
     "djangorestframework==3.17.0",
     "djangorestframework-simplejwt==5.5.1",
@@ -37,6 +36,7 @@ dependencies = [
     "oauthlib==3.3.1",
     "packaging==26.0",
     "pillow==12.1.1",
+    "pre-commit>=4.6.0",
     "pycparser==3.0",
     "pyjwt==2.12.1",
     "python3-openid==3.2.0",
@@ -60,7 +60,9 @@ dependencies = [
 
 [tool.ruff]
 # Target Python version
-target-version = "py311"
+target-version = "py312"
+fix = true
+unsafe-fixes = true
 
 [tool.ruff.lint]
 # Core rules for a robust FastAPI project
@@ -71,20 +73,22 @@ select = [
     "I",    # isort (auto-sorts imports)
     "B",    # flake8-bugbear (catches common bugs)
     "UP",   # pyupgrade (forces modern Python syntax)
-    "FAST", # FastAPI-specific rules (e.g., FAST001, FAST002)
     "RUF",  # Ruff-specific rules (includes Pydantic typing & mutable defaults checks)
 ]
 
-ignore = []
+ignore = [
+    "RUF012",
+]
 
 [tool.ruff.lint.isort]
 # Combines multiple imports from the same module onto a single line
 combine-as-imports = true
+force-sort-within-sections = true
 
 [tool.ruff.format]
-# Enable standard formatting preferences
 quote-style = "double"
 indent-style = "space"
+preview = true
 
 [dependency-groups]
 dev = [
@@ -97,13 +101,10 @@ dev = [
 addopts = "--cov=. --cov-report=term-missing --cov-report=html"
 pythonpath = ["."]
 
-[tool.coverage.run]
-# Ignore your testing files and virtual environment folder when calculating coverage
-omit = [
-    "tests/*",
-    ".venv/*",
-    "main.py", # optional: skip main entry point if it's just app initialization
-]
+[tool.ruff.lint.per-file-ignores]
+"**/serializers.py" = ["RUF012"]
+"**/views.py" = ["RUF012"]
+"**/models.py" = ["RUF012"]
 
 [tool.coverage.report]
 # Fail the test suite if total coverage drops under a specific threshold (e.g., 80%)

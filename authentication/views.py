@@ -153,14 +153,14 @@ class AuthViewSet(ViewSet):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
-        refresh = session_token(user, role, user_session.session_version, request)
-        access = access_token(refresh)
 
         # pylint: disable=no-member
-        user_session, created = session_db.objects.get_or_create(
+        user_session, _created = session_db.objects.get_or_create(
             user_id=user, defaults={"session_version": 0}
         )
 
+        refresh = session_token(user, role, user_session.session_version, request)
+        access = access_token(refresh)
         user_session.session_version = F("session_version") + 1
         user_session.save()
 
@@ -256,14 +256,12 @@ class AuthViewSet(ViewSet):
                 token,
             )
 
-        return Response(
-            {
-                "message": (
-                    "If an account exists with this email, "
-                    "a password reset link has been sent."
-                )
-            }
-        )
+        return Response({
+            "message": (
+                "If an account exists with this email, "
+                "a password reset link has been sent."
+            )
+        })
 
     @action(
         detail=True,
