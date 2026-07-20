@@ -4,7 +4,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from uuid import uuid4
 
+from django.utils import timezone
 from authentication.managers import UserManager
 
 # Create your models here.
@@ -48,8 +50,24 @@ class User(AbstractUser):
 class Sessions(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     session_token = models.TextField()
+    access_token = models.TextField()
     device_fingerprint = models.TextField()
     session_version = models.IntegerField(default=0)
     last_ip = models.TextField()
     payload_data = models.TextField()
     last_active = models.DateTimeField(auto_now=True)
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    jti = models.UUIDField(default=uuid4, unique=True, editable=False)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at

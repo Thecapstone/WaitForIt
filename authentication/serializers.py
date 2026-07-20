@@ -11,34 +11,8 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from authentication.models import User as user_db
+from authentication.tokens import generate_token, verify_verification_token
 
-EMAIL_SECRET_KEY = os.getenv("Email_Key")
-ALGORITHM = "HS256"
-
-TokenTypes = {"EMAIL": "email_verification", "PASSWORD": "password_reset"}
-
-
-def generate_token(user_id, token_type) -> str:
-    """Generate a unique token for email verification."""
-    payload = {
-        "user_id": user_id,
-        "type": token_type,
-        "exp": datetime.utcnow() + timedelta(hours=24),
-    }
-    return jwt.encode(payload, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
-
-
-def verify_verification_token(token) -> str:
-    """Verify user account using email token"""
-    try:
-        payload = jwt.decode(token, EMAIL_SECRET_KEY, algorithms=[ALGORITHM])
-        if payload.get("type") != "email_verification":
-            raise serializers.ValidationError("Invalid token type.")
-        return payload["user_id"]
-    except jwt.ExpiredSignatureError:
-        raise serializers.ValidationError("Token has expired.")
-    except jwt.InvalidTokenError:
-        raise serializers.ValidationError("Invalid token.")
 
 
 class UserCreateSerializer(ModelSerializer):
@@ -63,24 +37,8 @@ class UserCreateSerializer(ModelSerializer):
             password=validated_data["password"],
             is_active=False,
         )
-        token = generate_token(user.id, token_type=TokenTypes["EMAIL"])
+        return user
 
-        # Send Email
-        verification_link = f"http://localhost:8000/auth/verify/{user.id}/{token}/"
-        send_verification_email(
-            receiver_email=user.email,
-            verification_link=verification_link,
-            verification_token=token,
-        )
-
-        is_verified = verify_verification_token(token)
-        if is_verified:
-            user.is_verified = True
-            user.save()
-            return user
-        return serializers.ValidationError(
-            "Email verification failed. Please try again."
-        )
 
 
 class CreateAdminSerializer(ModelSerializer):
@@ -124,23 +82,18 @@ class UserLoginSerializer(Serializer):
         raise serializers.ValidationError("Invalid credentials")
 
 
-class ForgotPasswordSerializer(Serializer):
-    """Serializer for handling password reset requests."""
-
-    email = serializers.EmailField(required=True)
-    user = authenticate(email)
-    token = generate_token(user.id, token_type=TokenTypes["PASSWORD"])
-
-    password_reset_link = f"http://localhost:8000/auth/forgot-password/{token}/"
-    send_password_reset_email(
-        user=user.email, reset_link=password_reset_link, reset_token=token
-    )
-
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
 
 # pylint: disable=too-few-public-methods
-class PasswordResetSerializer(Serializer):
-    """Serializer managing incoming email and credential updates."""
+class PasswordResetSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
 
-    email = serializers.EmailField(required=True)
-    new_password = serializers.CharField(write_only=True, required=True)
-    new_password_confirm = serializers.CharField(write_only=True, required=True)
+    def validate(self, attrs):
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError(
+                "Passwords do not match."
+            )
+        return attrs

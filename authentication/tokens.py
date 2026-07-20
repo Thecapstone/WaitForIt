@@ -3,6 +3,7 @@
 import datetime
 import hashlib
 import os
+from datetime import timedelta
 from typing import Any, Dict
 from uuid import uuid4
 import jwt
@@ -12,8 +13,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from user_agents.parsers import parse
 
+from authentication.models import PasswordResetToken, User as user_db
+
 ACCESS_SECRET = os.getenv("ACCESS_SECRET")
 SESSION_SECRET = os.getenv("SESSION_SECRET")
+EMAIL_SECRET_KEY = os.getenv("Email_Key")
+
+TokenTypes = {"EMAIL": "email_verification", "PASSWORD": "password_reset"}
 ALGORITHM = "HS256"
 
 # pylint: disable=too-few-public-methods
@@ -113,3 +119,92 @@ def access_token(session_token: str) -> str:
         raise ValueError("Session token has expired. Please log in again.")
     except jwt.InvalidTokenError:
         raise ValueError("Invalid session token.")
+
+
+
+
+
+def generate_token(user_id, exp, token_type) -> str:
+    """Generate a unique token for email verification and password reset."""
+    jti = str(uuid4())
+    payload = {
+        "user_id": user_id,
+        "type": token_type,
+        "jti": jti,
+        "exp": exp,
+    }
+    return jwt.encode(payload, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
+
+
+def generate_password_reset_token(user, exp, token_type) -> str:
+    """Generate and persist a one-time password reset token."""
+
+    jti = uuid4()
+
+    PasswordResetToken.objects.create(
+        user=user,
+        jti=jti,
+        expires_at=exp,
+    )
+
+    payload = {
+        "user_id": user.id,
+        "type": token_type,
+        "jti": str(jti),
+        "exp": exp,
+    }
+
+    return jwt.encode(payload, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_verification_token(token) -> str:
+    """Verify user account using email token"""
+    try:
+        payload = jwt.decode(token, EMAIL_SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "email_verification":
+            raise ValueError("Invalid token type.")
+        return payload["user_id"]
+    except jwt.ExpiredSignatureError:
+        raise ValueError("Token has expired.")
+    except jwt.InvalidTokenError:
+        raise ValueError("Invalid token.")
+    
+from django.utils import timezone
+
+
+def verify_password_reset_token(token) -> user_db:
+    """Verify a password reset token and mark it as used."""
+
+    try:
+        payload = jwt.decode(
+            token,
+            EMAIL_SECRET_KEY,
+            algorithms=[ALGORITHM],
+        )
+
+        if payload.get("type") != "password_reset":
+            raise ValueError("Invalid token type.")
+
+        reset_token = PasswordResetToken.objects.select_related("user").get(
+            jti=payload["jti"]
+        )
+
+        if reset_token.used_at is not None:
+            raise ValueError("This reset link has already been used.")
+
+        if reset_token.expires_at <= timezone.now():
+            raise ValueError("Reset link has expired.")
+
+        reset_token.used_at = timezone.now()
+        reset_token.save(update_fields=["used_at"])
+
+        return reset_token.user
+
+    except PasswordResetToken.DoesNotExist:
+        raise ValueError("Invalid password reset token.")
+
+    except jwt.ExpiredSignatureError as err:
+        raise ValueError("Reset link has expired.") from err
+
+    except jwt.InvalidTokenError as err:
+        raise ValueError("Invalid password reset token.") from err
