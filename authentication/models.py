@@ -1,12 +1,12 @@
 from typing import ClassVar
+from uuid import uuid4
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from uuid import uuid4
-
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
 from authentication.managers import UserManager
 
 # Create your models here.
@@ -56,6 +56,7 @@ class Sessions(models.Model):
     last_ip = models.TextField()
     payload_data = models.TextField()
     last_active = models.DateTimeField(auto_now=True)
+
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

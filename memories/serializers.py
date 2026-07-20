@@ -4,8 +4,10 @@ from pathlib import Path
 
 import cloudinary.utils
 import moviepy.Clip as VideoFileClip
-from cloudinary.uploader import destroy as delete_from_cloudinary
-from cloudinary.uploader import upload as upload_to_cloudinary
+from cloudinary.uploader import (
+    destroy as delete_from_cloudinary,
+    upload as upload_to_cloudinary,
+)
 from django.db import transaction
 from rest_framework import serializers
 

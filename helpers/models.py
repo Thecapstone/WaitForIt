@@ -1,7 +1,7 @@
-from django.db import models
-import uuid
 from uuid import uuid4
+
 import auto_prefetch
+from django.db import models
 
 
 def generate_unique_id() -> str:

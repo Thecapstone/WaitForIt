@@ -1,8 +1,6 @@
-from django.urls import path
 from rest_framework import routers
 
 from authentication.views import AuthViewSet
-from health.views import HealthCheckView
 from memories.views import CapsuleViewSet
 
 app_name = "api"

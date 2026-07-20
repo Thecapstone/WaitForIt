@@ -1,9 +1,8 @@
+import os
 import smtplib
 import ssl
-import os
-import random
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 sender_email = os.getenv("EMAIL_ADDRESS")
 sender_password = os.getenv("EMAIL_PASSWORD")

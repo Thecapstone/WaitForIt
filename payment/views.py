@@ -1,8 +1,10 @@
 import uuid
+
 import requests
-import config.settings as settings
-from django.shortcuts import render
 from django.http import HttpResponse
+from django.shortcuts import render
+
+import config.settings as settings
 
 
 def initiate_payment(request):

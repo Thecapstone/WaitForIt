@@ -1,18 +1,10 @@
 """Serializers for user registration, authentication, and password management."""
 
-import datetime
-import os
-
-import jwt
-from datetime import timedelta
-from helpers.emailClient import send_password_reset_email, send_verification_email
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from authentication.models import User as user_db
-from authentication.tokens import generate_token, verify_verification_token
-
 
 
 class UserCreateSerializer(ModelSerializer):
@@ -38,7 +30,6 @@ class UserCreateSerializer(ModelSerializer):
             is_active=False,
         )
         return user
-
 
 
 class CreateAdminSerializer(ModelSerializer):
@@ -85,6 +76,7 @@ class UserLoginSerializer(Serializer):
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
+
 # pylint: disable=too-few-public-methods
 class PasswordResetSerializer(serializers.Serializer):
     token = serializers.CharField()
@@ -93,7 +85,5 @@ class PasswordResetSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:
-            raise serializers.ValidationError(
-                "Passwords do not match."
-            )
+            raise serializers.ValidationError("Passwords do not match.")
         return attrs

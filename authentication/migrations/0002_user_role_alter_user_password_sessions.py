@@ -6,33 +6,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('authentication', '0001_initial'),
+        ("authentication", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='role',
-            field=models.CharField(choices=[('user', 'Regular User'), ('admin', 'Administrator'), ('tester', 'Test User')], default='user', max_length=15),
+            model_name="user",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("user", "Regular User"),
+                    ("admin", "Administrator"),
+                    ("tester", "Test User"),
+                ],
+                default="user",
+                max_length=15,
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='password',
-            field=models.TextField(unique=True, verbose_name='password'),
+            model_name="user",
+            name="password",
+            field=models.TextField(unique=True, verbose_name="password"),
         ),
         migrations.CreateModel(
-            name='Sessions',
+            name="Sessions",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('session_token', models.TextField()),
-                ('device_fingerprint', models.TextField()),
-                ('session_version', models.IntegerField(default=0)),
-                ('last_ip', models.TextField()),
-                ('payload_data', models.TextField()),
-                ('last_active', models.DateTimeField(auto_now=True)),
-                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("session_token", models.TextField()),
+                ("device_fingerprint", models.TextField()),
+                ("session_version", models.IntegerField(default=0)),
+                ("last_ip", models.TextField()),
+                ("payload_data", models.TextField()),
+                ("last_active", models.DateTimeField(auto_now=True)),
+                (
+                    "user_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

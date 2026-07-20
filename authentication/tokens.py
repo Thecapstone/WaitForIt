@@ -3,9 +3,8 @@
 import datetime
 import hashlib
 import os
-from datetime import timedelta
-from typing import Any, Dict
 from uuid import uuid4
+
 import jwt
 from ipware import get_client_ip
 from rest_framework import permissions
@@ -22,6 +21,7 @@ EMAIL_SECRET_KEY = os.getenv("Email_Key")
 TokenTypes = {"EMAIL": "email_verification", "PASSWORD": "password_reset"}
 ALGORITHM = "HS256"
 
+
 # pylint: disable=too-few-public-methods
 class CookieJWTAuthentication(JWTAuthentication):
     """Authentication class that extracts the JWT token from HTTP-only cookies."""
@@ -35,12 +35,12 @@ class CookieJWTAuthentication(JWTAuthentication):
         try:
             validated_token = self.get_validated_token(token)
         except AuthenticationFailed as e:
-            raise AuthenticationFailed(f"Token validation failed:{str(e)}") from e
+            raise AuthenticationFailed(f"Token validation failed:{e!s}") from e
         try:
             user = self.get_user(validated_token)
             return user, validated_token
         except AuthenticationFailed as e:
-            raise AuthenticationFailed(f"Error retrieving user: {str(e)}") from e
+            raise AuthenticationFailed(f"Error retrieving user: {e!s}") from e
 
 
 def create_user_agent(u_agent: str, ip: str) -> str:
@@ -106,9 +106,8 @@ def access_token(session_token: str) -> str:
         access_payload = {
             "user_id": user_id,
             "role": role,
-            "exp": datetime.datetime.now(datetime.timezone.utc)
-            + datetime.timedelta(minutes=15),
-            "iat": datetime.datetime.now(datetime.timezone.utc),
+            "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=15),
+            "iat": datetime.datetime.now(datetime.UTC),
             "type": "access",
         }
 
@@ -119,9 +118,6 @@ def access_token(session_token: str) -> str:
         raise ValueError("Session token has expired. Please log in again.")
     except jwt.InvalidTokenError:
         raise ValueError("Invalid session token.")
-
-
-
 
 
 def generate_token(user_id, exp, token_type) -> str:
@@ -168,7 +164,8 @@ def verify_verification_token(token) -> str:
         raise ValueError("Token has expired.")
     except jwt.InvalidTokenError:
         raise ValueError("Invalid token.")
-    
+
+
 from django.utils import timezone
 
 

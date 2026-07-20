@@ -1,5 +1,5 @@
-from django.db import models
 from capsulers.models import User
+from django.db import models
 
 
 class UserSubscription(models.Model):

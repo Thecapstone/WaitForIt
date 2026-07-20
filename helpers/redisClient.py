@@ -1,6 +1,6 @@
 from datetime import timezone
-from importlib.metadata import files
 from typing import TYPE_CHECKING
+
 from redis import Redis
 
 redis_client = Redis(

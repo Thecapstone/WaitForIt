@@ -1,6 +1,6 @@
 from django.urls import path
-from payment.views import initiate_payment, payment_callback
 
+from payment.views import initiate_payment, payment_callback
 
 urlpatterns = [
     path("", initiate_payment, name="pay"),
