@@ -50,10 +50,9 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     # local apps
-    "capsulers",
+    "authentication",
     "memories",
     "payment",
-    "health",
 ]
 
 
@@ -89,7 +88,7 @@ TEMPLATES = [
     },
 ]
 
-AUTH_USER_MODEL = "capsulers.User"
+AUTH_USER_MODEL = "authentication.User"
 # ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 # ACCOUNT_USERNAME_REQUIRED = False
 # ACCOUNT_LOGIN_METHODS = {'email'}
@@ -127,10 +126,13 @@ LOGGING = {
             "level": "INFO",
         },
         "file": {
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.TimedRotatingFileHandler",
             "filename": "django_errors.log",  # Saves to project root
             "formatter": "standard",
             "level": "WARNING",  # Only warnings and errors go to this file
+            "when": "D",  # "D" stands for Day (rotates at midnight daily)
+            "interval": 1,  # Every 1 day
+            "backupCount": 30,  # Keep 30 days worth of logs
         },
     },
     # 3. Loggers: Channel-specific routing rules
@@ -190,7 +192,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         #'rest_framework.authentication.TokenAuthentication',
-        "capsulers.authentication.CookieJWTAuthentication",
+        "authentication.tokens.CookieJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": [

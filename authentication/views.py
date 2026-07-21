@@ -2,11 +2,13 @@
 
 import datetime
 from datetime import timedelta
+import os
 from tokenize import TokenError
 from typing import Any
 
 from django.db.models import F
 from django.utils import timezone
+from ipware import get_client_ip
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -38,6 +40,8 @@ from authentication.tokens import (
 )
 from helpers.emailClient import send_password_reset_email, send_verification_email
 
+Host = os.getenv("HOST")
+
 
 class AuthViewSet(ViewSet):
     """User authentication endpoint handling cookies and session tracking."""
@@ -60,23 +64,23 @@ class AuthViewSet(ViewSet):
                 user.id, token_expiry, token_type=TokenTypes["EMAIL"]
             )
 
-        # Send Email
-        verification_link = f"http://localhost:8000/auth/verify/{user.id}/{token}/"
-        send_verification_email(
-            receiver_email=user.email,
-            verification_link=verification_link,
-            verification_token=token,
-        )
-
-        is_verified = verify_verification_token(token)
-        if is_verified:
-            user.is_verified = True
-            user.save()
-            serializer.save(role=user_db.Roles.USER)
-            return Response(
-                {"message": "User registered successfully"},
-                status=status.HTTP_201_CREATED,
+            # Send Email
+            verification_link = f"http://{Host}:8000/auth/verify/{user.id}/{token}/"
+            send_verification_email(
+                receiver_email=user.email,
+                verification_link=verification_link,
+                verification_token=token,
             )
+
+            is_verified = verify_verification_token(token)
+            if is_verified:
+                user.is_verified = True
+                user.save()
+                serializer.save(role=user_db.Roles.USER)
+                return Response(
+                    {"message": "User registered successfully"},
+                    status=status.HTTP_201_CREATED,
+                )
         return Response(
             "Email verification failed. Please try again.",
             status=status.HTTP_404_NOT_FOUND,
@@ -141,7 +145,6 @@ class AuthViewSet(ViewSet):
         user = validated_data["user"]
         role = validated_data["role"]
 
-        user = user.id
         user.is_active = True
         user.save()
 
@@ -153,12 +156,17 @@ class AuthViewSet(ViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        ip_address, _ = get_client_ip(request)
+        user.last_login_ip = ip_address
+        user.last_login = timezone.now()  # optional if you're tracking it
+        user.save(update_fields=["last_login_ip", "last_login"])
+
         # pylint: disable=no-member
         user_session, _created = session_db.objects.get_or_create(
-            user_id=user, defaults={"session_version": 0}
+            user_id=user.id, defaults={"session_version": 0}
         )
 
-        refresh = session_token(user, role, user_session.session_version, request)
+        refresh = session_token(user.id, role, user_session.session_version, request)
         access = access_token(refresh)
         user_session.session_version = F("session_version") + 1
         user_session.save()
@@ -201,15 +209,14 @@ class AuthViewSet(ViewSet):
                 refresh.blacklist()
 
                 user = request.user
-                user.is_active = False
+                user.is_authenticated = False
                 user.save()
 
                 # pylint: disable=no-member
                 user_session = session_db.objects.get(user_id=user.id)
                 user_session.session_token = ""
-                user_session.access_token = ""
                 user_session.last_ip = ""
-                user_session.session_version = 0
+                user_session.session_version += 1
                 user_session.payload_data = ""
                 user_session.device_fingerprint = ""
                 user_session.last_active = timezone.now()
@@ -247,7 +254,7 @@ class AuthViewSet(ViewSet):
                 user, token_expiry, token_type=TokenTypes["PASSWORD"]
             )
 
-            reset_link = f"https://localhost:8000/auth/reset-password?token={token}"
+            reset_link = f"https://{Host}:8000/auth/reset-password?token={token}"
 
             send_password_reset_email(
                 user.email,

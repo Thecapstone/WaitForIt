@@ -1,4 +1,7 @@
-from rest_framework.decorators import throttle_classes
+import logging
+
+from rest_framework import permissions
+from rest_framework.decorators import action, throttle_classes
 from rest_framework.response import Response
 import rest_framework.status as status
 from rest_framework.throttling import UserRateThrottle
@@ -13,6 +16,8 @@ from memories.serializers import (
     CapsuleUpdateSerializer,
     CapsuleViewSerializer,
 )
+
+logger = logging.getLogger("waitforit")
 
 
 class TwicePerDayUserThrottle(UserRateThrottle):
@@ -31,10 +36,15 @@ class CapsuleViewSet(ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="capsule-preview",
+        permission_classes=[permissions.IsAuthenticated],
+    )
     def preview(self, request, pk):
         """
-        retrieve specific information about the capsule(such as; description, teaser, title, avatar??), before it is unlocked
-        access to this feature depends on the privacy of the capsule.
+        View limited capsule content, before maturity
         """
         try:
             capsule = capsule_db.objects.get(id=pk)
@@ -53,7 +63,7 @@ class CapsuleViewSet(ModelViewSet):
 
     def retrieve(self, request, pk):
         """
-        retrieve all data stored in a capsule, by members, once the open date reaches.
+        View all capsule content, by members, once the open date reaches.
         """
         try:
             capsule = capsule_db.objects.get(id=pk)
@@ -78,8 +88,7 @@ class CapsuleViewSet(ModelViewSet):
 
     def update(self, request, pk):
         """
-        restricts the ability to update capsule data to contributors and creators,
-        other non-priviledged members are prevented
+        Update capsule data by contributors or creator not members.
         """
         try:
             capsule = capsule_db.objects.get(id=pk)
