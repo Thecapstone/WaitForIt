@@ -1,3 +1,6 @@
+from datetime import datetime
+import json
+import logging
 import os
 from pathlib import Path
 import tempfile
@@ -11,7 +14,10 @@ from django.db import transaction
 import moviepy.Clip as VideoFileClip
 from rest_framework import serializers
 
-from memories.models import Capsule, Images, Teasers, Videos
+from helpers import redisClient as _redis
+from memories.models import Articles, Capsule, Images, Logs, Teasers, Videos
+
+logger = logging.getLogger("waitforit")
 
 
 def _save_upload_to_temp(uploaded_file):
@@ -102,9 +108,13 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
             "private",
         ]
 
-    def create(self, validated_data):
+    async def create(self, validated_data):
+        request = self.context.get("request")
+        user = request.user if request else None
+
         video_file = validated_data.pop("video", None)
         image_file = validated_data.pop("image", None)
+        log = validated_data.pop("log", None)
         generate_teaser = validated_data.pop("teasers", False)
 
         uploaded_resources = []
@@ -180,15 +190,36 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
                     Images.objects.create(
                         capsule=capsule, image_title=image_title, image_file=image_url
                     )
+                if log:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            except Exception as e:
+                    log_title = f"initial_log_{user.id}_{timestamp}"
+                    Logs.objects.create(
+                        capsule=capsule, title=log_title, description=log
+                    )
+
+            except Exception as exc:
                 _cleanup_cloudinary_resources(uploaded_resources)
-                raise e
+                logger.warning(
+                    "CLOUDINARY_RESOURCE_UPLOAD_FAILED | request=%s | error=%s ",
+                    request.id,
+                    exc,
+                )
+                raise exc
+
             finally:
                 for temp_path in temp_paths:
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
-
+            payload = {
+                "capsule_id": capsule.id,
+                "user_id": user.id,
+                "log_id": log.id,
+                "image_id": capsule.image.id if capsule.image else None,
+            }
+            await _redis.queue_log(
+                json.dumps(payload),
+            )
         return capsule
 
 
@@ -213,6 +244,12 @@ class CapsulePreviewSerializer(serializers.ModelSerializer):
             if preview.teaser_url
         ]
 
+    def get(self, validated_data):
+        request = self.context.get("request")
+        capsule = request.capsule.id if request else None
+        Articles.objects.get(capsule=capsule)
+        Logs.objects.get(capsule=capsule)
+
     class Meta:
         model = Capsule
         fields = ["title", "description", "teasers"]
@@ -221,7 +258,115 @@ class CapsulePreviewSerializer(serializers.ModelSerializer):
 class CapsuleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Capsule
-        fields = ["image", "image_alt_text", "video", "video_alt_text", "log"]
+        fields = ["image", "video", "teasers", "log"]
+
+    async def create(self, validated_data):
+        request = self.context.get("request")
+        user = request.user if request else None
+
+        video_file = validated_data.pop("video", None)
+        image_file = validated_data.pop("image", None)
+        log = validated_data("log", None)
+        generate_teaser = validated_data.pop("teasers", False)
+
+        uploaded_resources = []
+        temp_paths = []
+
+        with transaction.atomic():
+            image_link = cloudinary.utils.cloudinary_url("image_public_id")
+            video_link = cloudinary.utils.cloudinary_url("video_public_id")
+            capsule = Capsule.objects.create(image=image_link, video=video_link)
+            try:
+                if video_file:
+                    source_video_path = _save_upload_to_temp(video_file)
+                    temp_paths.append(source_video_path)
+
+                    video_upload = _upload_cloudinary_resource(
+                        source_video_path,
+                        resource_type="video",
+                        folder="capsule_videos",
+                    )
+                    uploaded_resources.append({
+                        "public_id": video_upload.get("public_id"),
+                        "resource_type": "video",
+                    })
+
+                    video_url = video_upload.get("secure_url") or video_upload.get(
+                        "url"
+                    )
+                    video_title = getattr(video_file, "name", "capsule_video")[:100]
+                    video_obj = Videos.objects.create(
+                        capsule=capsule,
+                        video_title=video_title,
+                        video_file=video_url,
+                        teaser=generate_teaser,
+                    )
+
+                    if generate_teaser:
+                        teaser_path = _generate_teaser_file(source_video_path)
+                        temp_paths.append(teaser_path)
+
+                        teaser_upload = _upload_cloudinary_resource(
+                            teaser_path, resource_type="video", folder="capsule_teasers"
+                        )
+                        uploaded_resources.append({
+                            "public_id": teaser_upload.get("public_id"),
+                            "resource_type": "video",
+                        })
+
+                        Teasers.objects.create(
+                            video=video_obj,
+                            capsule=capsule,
+                            teaser_url=teaser_upload.get("secure_url")
+                            or teaser_upload.get("url"),
+                        )
+
+                if image_file:
+                    source_image_path = _save_upload_to_temp(image_file)
+                    temp_paths.append(source_image_path)
+
+                    image_upload = _upload_cloudinary_resource(
+                        source_image_path,
+                        resource_type="image",
+                        folder="capsule_images",
+                    )
+                    uploaded_resources.append({
+                        "public_id": image_upload.get("public_id"),
+                        "resource_type": "image",
+                    })
+
+                    image_url = image_upload.get("secure_url") or image_upload.get(
+                        "url"
+                    )
+                    image_title = getattr(image_file, "name", "capsule_image")[:100]
+                    Images.objects.create(
+                        capsule=capsule, image_title=image_title, image_file=image_url
+                    )
+                if log:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+                    log_title = f"new_log_{user.id}_{timestamp}"
+                    Logs.objects.create(
+                        capsule=capsule, title=log_title, description=log
+                    )
+
+            except Exception as e:
+                _cleanup_cloudinary_resources(uploaded_resources)
+                raise e
+            finally:
+                for temp_path in temp_paths:
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+            payload = {
+                "capsule_id": capsule.id,
+                "user_id": user.id,
+                "log_id": log.id,
+                "image_id": capsule.image.id if capsule.image else None,
+            }
+            await _redis.queue_log(
+                json.dumps(payload),
+            )
+        return capsule
 
 
 class CapsuleJoinSerializer(serializers.Serializer):

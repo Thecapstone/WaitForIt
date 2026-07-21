@@ -17,7 +17,7 @@ from authentication.models import PasswordResetToken, User as user_db
 
 ACCESS_SECRET = os.getenv("ACCESS_SECRET")
 SESSION_SECRET = os.getenv("SESSION_SECRET")
-EMAIL_SECRET_KEY = os.getenv("Email_Key")
+EMAIL_SECRET_KEY = os.getenv("EMAIL_KEY")
 
 TokenTypes = {"EMAIL": "email_verification", "PASSWORD": "password_reset"}
 ALGORITHM = "HS256"
@@ -44,11 +44,11 @@ class CookieJWTAuthentication(JWTAuthentication):
             raise AuthenticationFailed(f"Error retrieving user: {e!s}") from e
 
 
-def create_user_agent(u_agent: str, ip: str) -> str:
+def create_user_agent(u_agent: str, ip: str, fingerprint: str) -> str:
     """Generate a stable, hashed device fingerprint from IP and User Agent."""
     ip_addr = ".".join(ip.split(".")[:2])
     user_agent = parse(u_agent)
-    stable_string = f"{user_agent.os.family}--{user_agent.browser.family}--{user_agent.is_mobile}--{ip_addr}"
+    stable_string = f"{user_agent.os.family}--{user_agent.browser.family}--{user_agent.is_mobile}--{ip_addr}--{fingerprint}"
 
     return hashlib.sha256(stable_string.encode("utf-8")).hexdigest()
 
@@ -75,8 +75,8 @@ def session_token(user_id: int, role: str, session_version: int, request) -> str
     """Build and hash a tracking payload tracking user session versions."""
     ip_address, _ = get_client_ip(request)
     user_agent = request.META.get("HTTP_USER_AGENT", "")
-    active_devices = create_user_agent(user_agent, ip_address)
-    hashlib.sha256(uuid4().bytes).hexdigest()
+    fingerprint = hashlib.sha256(uuid4().bytes).hexdigest()
+    active_devices = create_user_agent(user_agent, ip_address, fingerprint)
     payload = {
         "user_id": user_id,
         "role": role,
@@ -98,10 +98,14 @@ def access_token(session_token: str) -> str:
 
         # 2. Extract necessary user identifiers
         user_id = session_payload.get("user_id")
+        session_version = session_payload.get("session_version")
         role = session_payload.get("role")
 
         if not user_id or not role:
             raise ValueError("Invalid session token payload data.")
+
+        if session_version != user_id.session_version:
+            raise AuthenticationFailed("Token has been revoked.")
 
         # 3. Define access token payload with expiration (e.g., 15 minutes)
         access_payload = {
