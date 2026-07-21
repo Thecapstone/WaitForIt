@@ -156,38 +156,3 @@ class CapsuleViewSet(ModelViewSet):
             {"message": "Unauthorized to share this capsule"},
             status=status.HTTP_401_UNAUTHORIZED,
         )
-
-    # Creator:
-    # can create a capsule
-    # can update capsule
-    # can add contributors and members
-    # can remove contributors and members
-    # can preview capsule
-
-    # Contributor:
-    # can update capsule
-    # can preview capsule
-
-    # Member:
-    # can view capsule
-
-    # Capsule:
-    # opening date
-    # .....
-
-    # get all public
-    # everyone
-
-    # get all by joined ID:
-    # creator and contributors
-
-    # 1 get users profile by the current signed in users id
-    # 2 get capsules_contributed_to field,
-    # 3 add the capsule to it, if it doesnt exist
-    # 4 update profile with updated contributed_to field
-
-    # concern: if contributors are also on members list, querying lists_joined will produce same capsule twice to account for
-    # a capsule which a user is a member of and a contributor of,
-    # but i need that for viewing restrictions,
-    # instead of specifying capsule creator, member, and contributor, will be neater to say
-    # if capsule.member and it includes all...?
