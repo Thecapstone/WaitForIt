@@ -14,20 +14,20 @@ class Capsule(UniqueUserId):
     title = models.CharField(max_length=224)
     description = models.CharField(max_length=220, null=True, blank=True)
     creator = models.ForeignKey(
-        "capsulers.User", on_delete=models.CASCADE, related_name="created_capsules"
+        "authentication.User", on_delete=models.CASCADE, related_name="created_capsules"
     )
-    log = models.TextField(blank=True)
     member = models.ManyToManyField(
-        "capsulers.User", related_name="capsules_joined", blank=True
+        "authentication.User", related_name="capsules_joined", blank=True
     )
     contributor = models.ManyToManyField(
-        "capsulers.User", related_name="capsules_contributed_to", blank=True
+        "authentication.User", related_name="capsules_contributed_to", blank=True
     )
     private = models.BooleanField(default=True)
     maturity_date = models.DateTimeField(
         default=get_default_expiry, help_text="Time to open capsule"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     @property
     def is_private(self):
@@ -42,11 +42,23 @@ class Capsule(UniqueUserId):
         return f"{self.title} is a private: {self.is_private}, capsule"
 
 
+class Logs(UniqueUserId):
+    capsule = models.ForeignKey(Capsule, on_delete=models.CASCADE, related_name="logs")
+    title = models.CharField()
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+
 class Videos(UniqueUserId):
-    capsule = models.ForeignKey("memories.Capsule", on_delete=models.CASCADE)
+    capsule = models.ForeignKey(
+        Capsule, on_delete=models.CASCADE, related_name="videos"
+    )
     video_title = models.CharField(max_length=100)
     video_file = models.URLField(max_length=512, blank=True)
     teaser = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     @property
     def use_for_teaser_generation(self):
@@ -54,9 +66,13 @@ class Videos(UniqueUserId):
 
 
 class Images(UniqueUserId):
-    capsule = models.ForeignKey("memories.Capsule", on_delete=models.CASCADE)
+    capsule = models.ForeignKey(
+        Capsule, on_delete=models.CASCADE, related_name="images"
+    )
     image_title = models.CharField(max_length=100)
     image_file = models.URLField(max_length=512, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
 
 class Teasers(UniqueUserId):
@@ -64,6 +80,31 @@ class Teasers(UniqueUserId):
         "memories.Videos", on_delete=models.DO_NOTHING, related_name="preview"
     )
     capsule = models.ForeignKey(
-        "memories.Capsule", on_delete=models.CASCADE, related_name="capsule_previews"
+        "memories.Capsule", on_delete=models.CASCADE, related_name="video_previews"
     )
     teaser_url = models.URLField(max_length=512, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+
+class Tag(models.Model):
+    # Unique ensures no duplicate tags are created
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Articles(UniqueUserId):
+    title = models.CharField(max_length=120)
+    capsule_id = models.ForeignKey(
+        "memories.Capsule", on_delete=models.CASCADE, related_name="articles"
+    )
+    tags = models.ForeignKey(
+        "memories.Tag", on_delete=models.DO_NOTHING, related_name="article"
+    )
+    body = models.TextField()
+    image = models.URLField(max_length=512, blank=True)
+
+    def __str__(self):
+        return self.title

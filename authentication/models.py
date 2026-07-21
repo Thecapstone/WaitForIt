@@ -28,8 +28,7 @@ class User(AbstractUser):
 
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
-    last_login = models.DateTimeField(_("last login"), blank=True, null=True)
-    last_login_ip = models.CharField(max_length=30)
+    last_login_ip = models.CharField(max_length=30, null=True, blank=True)
     is_premium = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
@@ -50,7 +49,6 @@ class User(AbstractUser):
 class Sessions(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     session_token = models.TextField()
-    access_token = models.TextField()
     device_fingerprint = models.TextField()
     session_version = models.IntegerField(default=0)
     last_ip = models.TextField()
