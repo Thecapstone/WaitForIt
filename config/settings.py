@@ -114,6 +114,41 @@ DATABASES = {
 }
 
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "level": "INFO",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "django_errors.log",  # Saves to project root
+            "formatter": "standard",
+            "level": "WARNING",  # Only warnings and errors go to this file
+        },
+    },
+    # 3. Loggers: Channel-specific routing rules
+    "loggers": {
+        # The Root Logger: Catches everything from Django and external libraries
+        "": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+        },
+        # Optional: Catch built-in Django database queries specifically
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "WARNING",  # Change to DEBUG to see raw SQL in terminal
+            "propagate": False,
+        },
+    },
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
