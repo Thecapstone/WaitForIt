@@ -137,6 +137,19 @@ def generate_token(user_id, exp, token_type) -> str:
     return jwt.encode(payload, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
 
 
+def verify_verification_token(token) -> str:
+    """Verify user account using email token"""
+    try:
+        payload = jwt.decode(token, EMAIL_SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "email_verification":
+            raise ValueError("Invalid token type.")
+        return payload["user_id"]
+    except jwt.ExpiredSignatureError as err:
+        raise ValueError("Token has expired.") from err
+    except jwt.InvalidTokenError as err:
+        raise ValueError("Invalid token.") from err
+
+
 def generate_password_reset_token(user, exp, token_type) -> str:
     """Generate and persist a one-time password reset token."""
 
@@ -156,19 +169,6 @@ def generate_password_reset_token(user, exp, token_type) -> str:
     }
 
     return jwt.encode(payload, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
-
-
-def verify_verification_token(token) -> str:
-    """Verify user account using email token"""
-    try:
-        payload = jwt.decode(token, EMAIL_SECRET_KEY, algorithms=[ALGORITHM])
-        if payload.get("type") != "email_verification":
-            raise ValueError("Invalid token type.")
-        return payload["user_id"]
-    except jwt.ExpiredSignatureError as err:
-        raise ValueError("Token has expired.") from err
-    except jwt.InvalidTokenError as err:
-        raise ValueError("Invalid token.") from err
 
 
 def verify_password_reset_token(token) -> user_db:
@@ -197,7 +197,7 @@ def verify_password_reset_token(token) -> user_db:
         reset_token.used_at = timezone.now()
         reset_token.save(update_fields=["used_at"])
 
-        return reset_token.user
+        return payload
 
     except PasswordResetToken.DoesNotExist as err:
         raise ValueError("Invalid password reset token.") from err
