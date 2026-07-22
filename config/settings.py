@@ -127,7 +127,9 @@ LOGGING = {
         },
         "file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "django_errors.log",  # Saves to project root
+            "filename": BASE_DIR
+            / "logs"
+            / "django_errors.log",  # Saves to project root
             "formatter": "standard",
             "level": "WARNING",  # Only warnings and errors go to this file
             "when": "D",  # "D" stands for Day (rotates at midnight daily)
