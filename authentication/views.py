@@ -1,19 +1,19 @@
 """Authentication views handling user registration, login, and logout."""
 
-import datetime
-from datetime import timedelta
+from datetime import timedelta, timezone
 import os
 from tokenize import TokenError
 from typing import Any
 
 from django.db.models import F
-from django.utils import timezone
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from ipware import get_client_ip
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from authentication.models import (
@@ -43,60 +43,132 @@ from helpers.emailClient import send_password_reset_email, send_verification_ema
 Host = os.getenv("HOST")
 
 
-class AuthViewSet(ViewSet):
+class AuthViewSet(GenericViewSet):
     """User authentication endpoint handling cookies and session tracking."""
 
-    permission_classes = [permissions.AllowAny]
+    def get_serializer_class(self):
+        if self.action == "register_user":
+            return UserCreateSerializer
+        if self.action == "create-super-admin":
+            return CreateAdminSerializer
+        elif self.action == "login":
+            return UserLoginSerializer
+        elif self.action == "forgot_password":
+            return ForgotPasswordSerializer
+        elif self.action == "password_reset":
+            return PasswordResetSerializer
 
+        return UserCreateSerializer
+
+    # permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        request=UserCreateSerializer,
+        responses={
+            status.HTTP_201_CREATED: OpenApiResponse(
+                description="Registration successful."
+            ),
+        },
+    )
     @action(
         detail=False,
-        methods=["post"],
+        methods=["POST"],
         url_path="register",
         permission_classes=[permissions.AllowAny],
     )
-    def user_register(self, request):
+    def register_user(self, request):
         """Register a new user account in the system."""
-        serializer = UserCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            user = request.user
-            token_expiry = datetime.utcnow() + timedelta(hours=24)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            user = serializer.save(role=user_db.Roles.USER)
+            token_expiry = timezone.now() + timedelta(hours=24)
             token = generate_token(
                 user.id, token_expiry, token_type=TokenTypes["EMAIL"]
             )
 
             # Send Email
-            verification_link = f"http://{Host}:8000/auth/verify/{user.id}/{token}/"
+            verification_link = f"{Host}:8000/api/auth/verify/{token}"
             send_verification_email(
                 receiver_email=user.email,
                 verification_link=verification_link,
                 verification_token=token,
             )
 
-            is_verified = verify_verification_token(token)
-            if is_verified:
-                user.is_verified = True
-                user.save()
-                serializer.save(role=user_db.Roles.USER)
-                return Response(
-                    {"message": "User registered successfully"},
-                    status=status.HTTP_201_CREATED,
-                )
+        except Exception:
+            return Response(
+                {"message": "Unable to complete registration at this time."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         return Response(
-            "Email verification failed. Please try again.",
-            status=status.HTTP_404_NOT_FOUND,
+            {
+                "message": "Registration successful. Please check your email to verify your account."
+            },
+            status=status.HTTP_201_CREATED,
         )
 
     @action(
         detail=False,
-        methods=["post"],
+        methods=["get"],
+        url_path=r"verify/(?P<token>[^/.]+)",
+        permission_classes=[permissions.AllowAny],
+    )
+    def verify(self, request, token: str):
+        """Verify a user's email address."""
+
+        token = request.data.get("token")
+
+        if not token:
+            return Response(
+                {"message": "Verification token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user_id = verify_verification_token(token)
+        except ValueError as exc:
+            return Response(
+                {"message": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(user_db, id=user_id)
+
+        if user.is_verified:
+            return Response(
+                {"message": "Email is already verified."},
+                status=status.HTTP_200_OK,
+            )
+
+        user.is_verified = True
+        user.save(update_fields=["is_verified"])
+
+        return Response(
+            {"message": "Email verified successfully."},
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        request=UserCreateSerializer,
+        responses={
+            status.HTTP_200_OK: UserLoginSerializer,
+        },
+    )
+    @action(
+        detail=False,
+        methods=["POST"],
         url_path="create-tester",
         permission_classes=[permissions.IsAdminUser],
     )
     def create_test_user(self, request):
         """Create a test user account for development and testing purposes."""
-        serializer = UserCreateSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(role=user_db.Roles.TESTER)
+            user = serializer.save(role=user_db.Roles.TESTER)
+            user.is_verified = True
+            user.save(update_fields=["is_verified"])
             return Response(
                 {"message": "Test account created successfully"},
                 status=status.HTTP_201_CREATED,
@@ -105,13 +177,13 @@ class AuthViewSet(ViewSet):
 
     @action(
         detail=False,
-        methods=["post"],
-        url_path="create-admin",
+        methods=["POST"],
+        url_path="create-super-admin",
         permission_classes=[HasBootstrapToken],
     )
     def create_initial_admin(self, request):
         """Create an initial admin account."""
-        serializer = CreateAdminSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(role=user_db.Roles.ADMIN)
         return Response(
@@ -121,13 +193,13 @@ class AuthViewSet(ViewSet):
 
     @action(
         detail=True,
-        methods=["post"],
+        methods=["POST"],
         url_path="create-admin",
         permission_classes=[permissions.IsAdminUser],
     )
     def create_admins(self, request):
         """Create additional admin accounts."""
-        serializer = CreateAdminSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(role=user_db.Roles.ADMIN)
         return Response(
@@ -135,10 +207,10 @@ class AuthViewSet(ViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-    @action(detail=False, methods=["post"], url_path="login")
+    @action(detail=False, methods=["POST"], url_path="login")
     def user_login(self, request):
         """Authenticate user credentials and set secure HTTP-only cookies."""
-        serializer = UserLoginSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         validated_data: dict[str, Any] = serializer.validated_data  # type: ignore[index]
@@ -196,7 +268,7 @@ class AuthViewSet(ViewSet):
 
     @action(
         detail=False,
-        methods=["post"],
+        methods=["GET"],
         url_path="logout",
         permission_classes=[IsAuthenticated],
     )
@@ -234,6 +306,12 @@ class AuthViewSet(ViewSet):
             response.delete_cookie(key)
         return response
 
+    @extend_schema(
+        request=ForgotPasswordSerializer,
+        responses={
+            status.HTTP_200_OK: None,
+        },
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -241,26 +319,31 @@ class AuthViewSet(ViewSet):
         permission_classes=[permissions.AllowAny],
     )
     def forgot_password(self, request):
-        serializer = ForgotPasswordSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.validated_data["email"]
-
-        user = user_db.objects.filter(email=email).first()
+        user = user_db.objects.filter(email=serializer.validated_data["email"]).first()
 
         if user:
-            token_expiry = datetime.utcnow() + timedelta(minutes=30)
+            expiry = timezone.now() + timedelta(minutes=30)
+
             token = generate_password_reset_token(
-                user, token_expiry, token_type=TokenTypes["PASSWORD"]
+                user,
+                expiry,
+                token_type=TokenTypes["PASSWORD"],
             )
 
-            reset_link = f"https://{Host}:8000/auth/reset-password?token={token}"
+            reset_link = f"{Host}:8000/api/auth/verify-reset/{token}"
 
-            send_password_reset_email(
-                user.email,
-                reset_link,
-                token,
-            )
+            try:
+                send_password_reset_email(
+                    user.email,
+                    reset_link,
+                    token,
+                )
+            except Exception:
+                # Log only.
+                pass
 
         return Response({
             "message": (
@@ -270,22 +353,77 @@ class AuthViewSet(ViewSet):
         })
 
     @action(
-        detail=True,
-        methods=["post"],
+        detail=False,
+        methods=["GET"],
+        url_path=r"verify-reset/(?P<token>[^/.]+)",
+        permission_classes=[permissions.AllowAny],
+    )
+    def verify_reset_token(self, token: str):
+        user_id = verify_password_reset_token(token)
+
+        return Response({
+            "valid": True,
+            "user_id": user_id,
+        })
+
+    @extend_schema(
+        request=PasswordResetSerializer,
+        responses={
+            status.HTTP_200_OK: None,
+            status.HTTP_400_BAD_REQUEST: None,
+        },
+    )
+    @action(
+        detail=False,
+        methods=["POST"],
         url_path="reset-password",
         permission_classes=[permissions.AllowAny],
     )
     def password_reset(self, request):
-        serializer = PasswordResetSerializer(data=request.data)
+        """Reset a user's password using a valid password reset token."""
+
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = verify_password_reset_token(serializer.validated_data["token"])
+        token = serializer.validated_data["token"]
+
+        try:
+            payload = verify_password_reset_token(token)
+        except ValueError as exc:
+            return Response(
+                {"message": str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(
+            user_db,
+            id=payload["user_id"],
+        )
+
+        # Ensure the token hasn't already been used or revoked
+        try:
+            PasswordResetToken.objects.get(
+                user=user,
+                jti=payload["jti"],
+            )
+        except PasswordResetToken.DoesNotExist:
+            return Response(
+                {
+                    "message": "Password reset token is invalid or has already been used."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user.set_password(serializer.validated_data["password"])
         user.session_version += 1
         user.save(update_fields=["password", "session_version"])
 
-        # Invalidate every outstanding reset token for this user
-        PasswordResetToken.objects.filter(user=user).delete()
+        # Invalidate only the token that was used
+        PasswordResetToken.objects.filter(
+            jti=payload["jti"],
+        ).delete()
 
-        return Response({"message": "Password reset successful."})
+        return Response(
+            {"message": "Password reset successful."},
+            status=status.HTTP_200_OK,
+        )
