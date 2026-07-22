@@ -1,8 +1,11 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import logging
 import os
 import smtplib
 import ssl
+
+logger = logging.getLogger(__name__)
 
 sender_mail = os.getenv("EMAIL_ADDRESS")
 sender_pass = os.getenv("EMAIL_PASSWORD")
@@ -46,9 +49,9 @@ def send_verification_email(receiver_email, verification_link, verification_toke
             server.sendmail(sender_email, receiver_email, message.as_string())
         print(f"Verification email sent successfully to {receiver_email}!")
         return verification_token
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+    except Exception:
+        logger.exception("Failed to send verification email.")
+        raise
 
 
 def send_password_reset_email(receiver_email, reset_link, reset_token):
