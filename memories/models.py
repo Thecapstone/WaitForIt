@@ -14,7 +14,7 @@ class Capsule(UniqueUserId):
     title = models.CharField(max_length=224)
     description = models.CharField(max_length=220, null=True, blank=True)
     creator = models.ForeignKey(
-        "authentication.User", on_delete=models.CASCADE, related_name="created_capsules"
+        "authentication.User", on_delete=models.CASCADE, related_name="capsule"
     )
     member = models.ManyToManyField(
         "authentication.User", related_name="capsules_joined", blank=True
@@ -44,7 +44,11 @@ class Capsule(UniqueUserId):
 
 class Logs(UniqueUserId):
     capsule = models.ForeignKey(Capsule, on_delete=models.CASCADE, related_name="logs")
-    title = models.CharField()
+    creator = models.ForeignKey(
+        "authentication.User", on_delete=models.CASCADE, related_name="logs"
+    )
+    stamp = models.CharField(max_length=120)
+    title = models.CharField(max_length=100)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
@@ -54,6 +58,7 @@ class Videos(UniqueUserId):
     capsule = models.ForeignKey(
         Capsule, on_delete=models.CASCADE, related_name="videos"
     )
+    log = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name="videos")
     video_title = models.CharField(max_length=100)
     video_file = models.URLField(max_length=512, blank=True)
     teaser = models.BooleanField(default=False)
@@ -69,6 +74,7 @@ class Images(UniqueUserId):
     capsule = models.ForeignKey(
         Capsule, on_delete=models.CASCADE, related_name="images"
     )
+    log = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name="images")
     image_title = models.CharField(max_length=100)
     image_file = models.URLField(max_length=512, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -100,6 +106,7 @@ class Articles(UniqueUserId):
     capsule_id = models.ForeignKey(
         "memories.Capsule", on_delete=models.CASCADE, related_name="articles"
     )
+    log = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name="articles")
     tags = models.ForeignKey(
         "memories.Tag", on_delete=models.DO_NOTHING, related_name="article"
     )
