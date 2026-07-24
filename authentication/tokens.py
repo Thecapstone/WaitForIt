@@ -2,9 +2,10 @@
 
 import datetime
 import hashlib
-import os
+from secrets import compare_digest
 from uuid import uuid4
 
+from django.conf import settings
 from django.utils import timezone
 from ipware import get_client_ip
 import jwt
@@ -13,11 +14,16 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from user_agents.parsers import parse
 
-from authentication.models import PasswordResetToken, User as user_db
+from authentication.models import (
+    EmailVerificationToken,
+    PasswordResetToken,
+    User as user_db,
+)
 
-ACCESS_SECRET = os.getenv("ACCESS_SECRET")
-SESSION_SECRET = os.getenv("SESSION_SECRET")
-EMAIL_SECRET_KEY = os.getenv("EMAIL_KEY")
+ACCESS_SECRET = settings.ACCESS_SECRET
+SESSION_SECRET = settings.SESSION_SECRET
+EMAIL_SECRET_KEY = settings.EMAIL_SECRET_KEY
+ADMIN_BOOTSTRAP_TOKEN = settings.ADMIN_KEY
 
 TokenTypes = {"EMAIL": "email_verification", "PASSWORD": "password_reset"}
 ALGORITHM = "HS256"
@@ -58,17 +64,13 @@ class HasBootstrapToken(permissions.BasePermission):
 
     def is_allowed(self, request, view):
         # Fetch the secret token from the server environment
-        secret_key = os.environ.get("ADMIN_BOOTSTRAP_TOKEN")
-        admin_token = jwt.encode({"key": secret_key}, "admin_key", algorithm="HS256")
+        secret_key = ADMIN_BOOTSTRAP_TOKEN
         if not secret_key:
             return False  # Secure by default if env variable is missing
 
         # Check for matching HTTP Header (e.g., 'X-Bootstrap-Token: my-secret-key')
         client_token = request.headers.get("X-Bootstrap-Token")
-        hashed_cookie = jwt.encode(
-            {"key": client_token}, "admin_key", algorithm="HS256"
-        )
-        return hashed_cookie == admin_token
+        return compare_digest(client_token or "", secret_key or "")
 
 
 def session_token(user_id: int, role: str, session_version: int, request) -> str:
@@ -128,8 +130,15 @@ def access_token(session_token: str) -> str:
 def generate_token(user_id, exp, token_type) -> str:
     """Generate a unique token for email verification and password reset."""
     jti = str(uuid4())
+
+    EmailVerificationToken.objects.create(
+        user=user_id,
+        jti=jti,
+        expires_at=exp,
+    )
+
     payload = {
-        "user_id": user_id,
+        "user_id": str(user_id),
         "type": token_type,
         "jti": jti,
         "exp": exp,
@@ -143,26 +152,26 @@ def verify_verification_token(token) -> str:
         payload = jwt.decode(token, EMAIL_SECRET_KEY, algorithms=[ALGORITHM])
         if payload.get("type") != "email_verification":
             raise ValueError("Invalid token type.")
-        return payload["user_id"]
+        return payload
     except jwt.ExpiredSignatureError as err:
         raise ValueError("Token has expired.") from err
     except jwt.InvalidTokenError as err:
         raise ValueError("Invalid token.") from err
 
 
-def generate_password_reset_token(user, exp, token_type) -> str:
+def generate_password_reset_token(user_id, exp, token_type) -> str:
     """Generate and persist a one-time password reset token."""
 
     jti = uuid4()
 
     PasswordResetToken.objects.create(
-        user=user,
+        user=user_id,
         jti=jti,
         expires_at=exp,
     )
 
     payload = {
-        "user_id": user.id,
+        "user_id": user_id,
         "type": token_type,
         "jti": str(jti),
         "exp": exp,
