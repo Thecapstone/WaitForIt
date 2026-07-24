@@ -25,6 +25,7 @@ class User(AbstractUser):
 
     email = models.EmailField(_("email address"), unique=True)
     password = models.TextField(_("password"), unique=True)
+    verification_email_sent_at = models.DateTimeField(null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
@@ -47,7 +48,9 @@ class User(AbstractUser):
 
 
 class Sessions(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="session_token"
+    )
     session_token = models.TextField()
     device_fingerprint = models.TextField()
     session_version = models.IntegerField(default=0)
@@ -57,7 +60,27 @@ class Sessions(models.Model):
 
 
 class PasswordResetToken(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="password_reset_token"
+    )
+    jti = models.UUIDField(default=uuid4, unique=True, editable=False)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
+
+
+class EmailVerificationToken(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="email_verification_token"
+    )
     jti = models.UUIDField(default=uuid4, unique=True, editable=False)
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
