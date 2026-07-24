@@ -1,9 +1,14 @@
+from datetime import timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import logging
 import os
 import smtplib
 import ssl
+
+from authentication.tokens import TokenTypes, generate_token
+
+Host = os.getenv("HOST")
 
 logger = logging.getLogger(__name__)
 
@@ -49,9 +54,9 @@ def send_verification_email(receiver_email, verification_link, verification_toke
             server.sendmail(sender_email, receiver_email, message.as_string())
         print(f"Verification email sent successfully to {receiver_email}!")
         return verification_token
-    except Exception:
-        logger.exception("Failed to send verification email.")
-        raise
+    except Exception as e:
+        print(f"Failed to send verification email {e}")
+        return False
 
 
 def send_password_reset_email(receiver_email, reset_link, reset_token):
@@ -98,3 +103,19 @@ def send_password_reset_email(receiver_email, reset_link, reset_token):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+
+
+def send_user_verification_email(user):
+    token = generate_token(
+        user.id,
+        timezone.now() + timedelta(hours=24),
+        TokenTypes["EMAIL"],
+    )
+
+    verification_link = f"{Host}:8000/api/auth/verify/{token}/"
+
+    return send_verification_email(
+        receiver_email=user.email,
+        verification_link=verification_link,
+        verification_token=token,
+    )
