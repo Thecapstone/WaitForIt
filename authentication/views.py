@@ -1,14 +1,16 @@
 """Authentication views handling user registration, login, and logout."""
 
-from datetime import timedelta, timezone
+from datetime import timedelta
 import os
 from tokenize import TokenError
 from typing import Any
 
 from django.db.models import F
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from ipware import get_client_ip
+import jwt
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -17,6 +19,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from authentication.models import (
+    EmailVerificationToken,
     PasswordResetToken,
     Sessions as session_db,
     User as user_db,
@@ -33,12 +36,11 @@ from authentication.tokens import (
     TokenTypes,
     access_token,
     generate_password_reset_token,
-    generate_token,
     session_token,
     verify_password_reset_token,
     verify_verification_token,
 )
-from helpers.emailClient import send_password_reset_email, send_verification_email
+from helpers.emailClient import send_password_reset_email, send_user_verification_email
 
 Host = os.getenv("HOST")
 
@@ -49,9 +51,11 @@ class AuthViewSet(GenericViewSet):
     def get_serializer_class(self):
         if self.action == "register_user":
             return UserCreateSerializer
-        if self.action == "create-super-admin":
+        elif self.action == "create_initial_admin":
             return CreateAdminSerializer
-        elif self.action == "login":
+        elif self.action == "create_admins":
+            return CreateAdminSerializer
+        elif self.action == "user_login":
             return UserLoginSerializer
         elif self.action == "forgot_password":
             return ForgotPasswordSerializer
@@ -66,7 +70,7 @@ class AuthViewSet(GenericViewSet):
         request=UserCreateSerializer,
         responses={
             status.HTTP_201_CREATED: OpenApiResponse(
-                description="Registration successful."
+                description="Register custom user."
             ),
         },
     )
@@ -81,22 +85,12 @@ class AuthViewSet(GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        try:
-            user = serializer.save(role=user_db.Roles.USER)
-            token_expiry = timezone.now() + timedelta(hours=24)
-            token = generate_token(
-                user.id, token_expiry, token_type=TokenTypes["EMAIL"]
-            )
+        user = serializer.save(role=user_db.Roles.USER)
+        success = send_user_verification_email(user)
 
-            # Send Email
-            verification_link = f"{Host}:8000/api/auth/verify/{token}"
-            send_verification_email(
-                receiver_email=user.email,
-                verification_link=verification_link,
-                verification_token=token,
-            )
-
-        except Exception:
+        if not success:
+            user.delete()
+            # except Exception:
             return Response(
                 {"message": "Unable to complete registration at this time."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -111,7 +105,7 @@ class AuthViewSet(GenericViewSet):
 
     @action(
         detail=False,
-        methods=["get"],
+        methods=["GET"],
         url_path=r"verify/(?P<token>[^/.]+)",
         permission_classes=[permissions.AllowAny],
     )
@@ -127,10 +121,16 @@ class AuthViewSet(GenericViewSet):
             )
 
         try:
-            user_id = verify_verification_token(token)
-        except ValueError as exc:
+            payload = verify_verification_token(token)
+            user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
             return Response(
-                {"message": str(exc)},
+                {"detail": "Verification link has expired."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except jwt.InvalidTokenError:
+            return Response(
+                {"detail": "Invalid verification link."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -143,7 +143,13 @@ class AuthViewSet(GenericViewSet):
             )
 
         user.is_verified = True
-        user.save(update_fields=["is_verified"])
+        user.is_active = True
+        user.save(update_fields=["is_active", "is_verified"])
+
+        token_db = EmailVerificationToken.objects.filter(
+            jti=payload["jti"],
+        )
+        token_db.used_at = timezone.now()
 
         return Response(
             {"message": "Email verified successfully."},
@@ -157,7 +163,7 @@ class AuthViewSet(GenericViewSet):
         },
     )
     @action(
-        detail=False,
+        detail=True,
         methods=["POST"],
         url_path="create-tester",
         permission_classes=[permissions.IsAdminUser],
@@ -207,7 +213,12 @@ class AuthViewSet(GenericViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-    @action(detail=False, methods=["POST"], url_path="login")
+    @action(
+        detail=False,
+        methods=["POST"],
+        url_path="login",
+        permission_classes=[permissions.AllowAny],
+    )
     def user_login(self, request):
         """Authenticate user credentials and set secure HTTP-only cookies."""
         serializer = self.get_serializer(data=request.data)
@@ -221,11 +232,37 @@ class AuthViewSet(GenericViewSet):
         user.save()
 
         if not user.is_verified:
+            can_send = (
+                not user.verification_email_sent_at
+                or timezone.now() - user.verification_email_sent_at
+                > timedelta(minutes=5)
+            )
+
+            if can_send:
+                send_user_verification_email(user)
+
+                user.verification_email_sent_at = timezone.now()
+                user.save(update_fields=["verification_email_sent_at"])
+
+                return Response(
+                    {
+                        "message": (
+                            "Your email has not been verified. "
+                            "We've sent you a new verification email."
+                        )
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
             return Response(
                 {
-                    "error": "Email not verified. Please verify your email before logging in."
+                    "message": (
+                        "Your email has not been verified. "
+                        "A verification email was sent recently. "
+                        "Please wait a few minutes before requesting another."
+                    )
                 },
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
         ip_address, _ = get_client_ip(request)
@@ -314,7 +351,7 @@ class AuthViewSet(GenericViewSet):
     )
     @action(
         detail=False,
-        methods=["post"],
+        methods=["POST"],
         url_path="forgot-password",
         permission_classes=[permissions.AllowAny],
     )
@@ -332,7 +369,6 @@ class AuthViewSet(GenericViewSet):
                 expiry,
                 token_type=TokenTypes["PASSWORD"],
             )
-
             reset_link = f"{Host}:8000/api/auth/verify-reset/{token}"
 
             try:
@@ -360,6 +396,10 @@ class AuthViewSet(GenericViewSet):
     )
     def verify_reset_token(self, token: str):
         user_id = verify_password_reset_token(token)
+        verified_token = PasswordResetToken.objects.get(user=user_id)
+
+        verified_token.used_at = timezone.now()
+        verified_token.save(update_fields=["user_at"])
 
         return Response({
             "valid": True,
@@ -385,7 +425,7 @@ class AuthViewSet(GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        token = serializer.validated_data["token"]
+        token = request.user.password_reset_token
 
         try:
             payload = verify_password_reset_token(token)

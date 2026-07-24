@@ -18,18 +18,19 @@ class UserCreateSerializer(ModelSerializer):
             "password": {"write_only": True, "required": True},
         }
 
+    def validate_email(self, value):
+        """Ensure the email address is unique."""
+        if user_db.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+
     def create(self, validated_data):
         """Create a new user instance securely with a hashed password."""
-        # Django's create_user automatically hashes the password!
-        # pylint: disable=no-member
-        # Standard fallback if using email as username
-        user = user_db.objects.create_user(
-            username=validated_data["email"],
+        return user_db.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
             is_active=False,
         )
-        return user
 
 
 class CreateAdminSerializer(ModelSerializer):
@@ -74,6 +75,10 @@ class UserLoginSerializer(Serializer):
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class ResendVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
 
