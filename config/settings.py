@@ -14,8 +14,12 @@ from datetime import timedelta
 import os
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -23,6 +27,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY", "bananA123")
+
+ACCESS_SECRET = env("ACCESS_SECRET")
+SESSION_SECRET = env("SESSION_SECRET")
+EMAIL_SECRET_KEY = env("EMAIL_KEY")
+ADMIN_KEY = env("ADMIN_BOOTSTRAP_TOKEN")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
