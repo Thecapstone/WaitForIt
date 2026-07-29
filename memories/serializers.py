@@ -1,12 +1,11 @@
 from datetime import datetime
-import json
 import logging
 import os
 
 from django.db import transaction
 from rest_framework import serializers
 
-from helpers import redisClient as _redis
+from helpers import STREAM, redis_client
 from helpers.cloudinaryUtils import (
     _cleanup_cloudinary_resources,
     _generate_teaser_file,
@@ -34,6 +33,7 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "creator",
+            "previous_article",
             "maturity_date",
             "private",
         ]
@@ -44,6 +44,9 @@ class LogCreationSerializer(serializers.ModelSerializer):
     image = serializers.FileField(write_only=True, required=False)
     teasers = serializers.BooleanField(write_only=True, required=False, default=False)
     creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    capsule = serializers.PrimaryKeyRelatedField(read_only=True)
+    code_language = serializers.CharField(write_only=True)
+    code_framework = serializers.CharField(write_only=True)
 
     class Meta:
         model = Logs
@@ -51,6 +54,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "creator",
+            "capsule",
             "code_language",
             "code_framework",
             "video",
@@ -160,15 +164,8 @@ class LogCreationSerializer(serializers.ModelSerializer):
                 for temp_path in temp_paths:
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
-            payload = {
-                "capsule_id": log.capsule.id,
-                "user_id": user.id,
-                "log_id": log.id,
-                "image_id": log.image.id if log.image else None,
-            }
-            await _redis.queue_log(
-                json.dumps(payload),
-            )
+            payload = {"log_id": log.id, "event": "log.created", "timestamp": datetime}
+            redis_client.xadd(STREAM, payload)
         return log
 
 

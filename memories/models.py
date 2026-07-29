@@ -26,6 +26,7 @@ class Capsule(UniqueUserId):
     maturity_date = models.DateTimeField(
         default=get_default_expiry, help_text="Time to open capsule"
     )
+    previous_article = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
