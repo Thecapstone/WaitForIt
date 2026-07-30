@@ -1,10 +1,12 @@
-from datetime import timedelta, timezone
+from datetime import timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import logging
 import os
 import smtplib
 import ssl
+
+from django.utils import timezone
 
 from authentication.tokens import TokenTypes, generate_token
 
