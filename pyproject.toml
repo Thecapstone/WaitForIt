@@ -28,6 +28,7 @@ dependencies = [
     "drf-spectacular==0.29.0",
     "drf-spectacular-sidecar==2026.3.1",
     "gunicorn==25.2.0",
+    "httpx>=0.28.1",
     "idna==3.15",
     "inflection==0.5.1",
     "jsonschema==4.26.0",
@@ -39,6 +40,7 @@ dependencies = [
     "pre-commit>=4.6.0",
     "pycparser==3.0",
     "pyjwt==2.13.0",
+    "python-dotenv>=1.2.2",
     "python3-openid==3.2.0",
     "pyyaml==6.0.3",
     "redis>=8.0.1",
@@ -95,12 +97,18 @@ preview = true
 dev = [
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
+    "pytest-django>=4.12.0",
 ]
 
 [tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
 # Automatically append coverage parameters whenever "uv run pytest" is executed
 addopts = "--cov=. --cov-report=term-missing --cov-report=html"
 pythonpath = ["."]
+
+python_files = [
+    "test_*.py",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "**/serializers.py" = ["RUF012"]
