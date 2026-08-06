@@ -32,6 +32,11 @@ ACCESS_SECRET = env("ACCESS_SECRET")
 SESSION_SECRET = env("SESSION_SECRET")
 EMAIL_SECRET_KEY = env("EMAIL_KEY")
 ADMIN_KEY = env("ADMIN_BOOTSTRAP_TOKEN")
+DB_HOST = env("DB_HOST")
+DB_PASSWORD = env("DB_PASSWORD")
+DB_PORT = env("DB_PORT")
+DB_USER = env("DB_USER")
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -118,10 +123,10 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": env("DB_PASSOWRD"),
-        "HOST": "db.dbcomdfgtihescmzyise.supabase.co",
-        "PORT": "5432",
+        "USER": DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT,
     }
 }
 
