@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 
+from django.db import IntegrityError
 from django.utils import timezone
 import pytest
 
@@ -366,7 +367,7 @@ class TestTagModel:
     def test_tag_is_unique(self):
         Tag.objects.create(name="python")
 
-        with pytest.raises(Exception):
+        with pytest.raises(IntegrityError):
             Tag.objects.create(name="python")
 
 
