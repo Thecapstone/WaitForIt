@@ -5,7 +5,6 @@ from authentication.serializers import UserCreateSerializer
 
 @pytest.mark.django_db
 def test_registration_serializer_valid():
-
     serializer = UserCreateSerializer(
         data={
             "email": "john@example.com",
@@ -18,7 +17,6 @@ def test_registration_serializer_valid():
 
 @pytest.mark.django_db
 def test_duplicate_email():
-
     serializer = UserCreateSerializer(
         data={
             "email": "john@example.com",

@@ -6,7 +6,7 @@ from django.db import transaction
 from rest_framework import serializers
 from time_capsule.memories.tasks import queue_logs
 
-#from helpers import STREAM, redis_client
+# from helpers import STREAM, redis_client
 from helpers.cloudinaryUtils import (
     _cleanup_cloudinary_resources,
     _generate_teaser_file,
