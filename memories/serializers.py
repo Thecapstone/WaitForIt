@@ -4,8 +4,9 @@ import os
 
 from django.db import transaction
 from rest_framework import serializers
+from time_capsule.memories.tasks import queue_logs
 
-from helpers import STREAM, redis_client
+#from helpers import STREAM, redis_client
 from helpers.cloudinaryUtils import (
     _cleanup_cloudinary_resources,
     _generate_teaser_file,
@@ -62,7 +63,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
             "teasers",
         ]
 
-    async def create(self, validated_data):
+    def create(self, validated_data):
         request = self.context.get("request")
         user = request.user if request else None
 
@@ -100,7 +101,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
                     )
                     video_title = getattr(video_file, "name", "capsule_video")[:100]
                     video_obj = Videos.objects.create(
-                        log=log.id,
+                        log=log,
                         capsule=log.capsule,
                         video_title=video_title,
                         video_file=video_url,
@@ -121,7 +122,6 @@ class LogCreationSerializer(serializers.ModelSerializer):
 
                         Teasers.objects.create(
                             video=video_obj,
-                            log=log,
                             teaser_url=teaser_upload.get("secure_url")
                             or teaser_upload.get("url"),
                         )
@@ -165,7 +165,8 @@ class LogCreationSerializer(serializers.ModelSerializer):
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
             payload = {"log_id": log.id, "event": "log.created", "timestamp": datetime}
-            redis_client.xadd(STREAM, payload)
+            queue_logs.delay_on_commit(payload)
+            # redis_client.xadd(STREAM, payload)
         return log
 
 
@@ -189,13 +190,8 @@ class CapsuleViewSerializer(serializers.ModelSerializer):
 
 
 class LogViewSerializer(serializers.ModelSerializer):
-    members = serializers.SerializerMethodField()
-
-    def get_members(self, obj) -> int:
-        return obj.member.count()
-
     class Meta:
-        model = Capsule
+        model = Logs
         fields = ["id", "title", "description", "created_at", "images", "videos"]
 
 
