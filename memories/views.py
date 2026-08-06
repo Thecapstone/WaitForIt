@@ -48,7 +48,11 @@ class CapsuleViewSet(ModelViewSet):
             )
         serializer = CapsuleViewSerializer(capsule)
 
-        if request.user != capsule.member and not capsule.is_open:
+        if (
+            request.user != capsule.creator
+            and request.user not in capsule.member.all()
+            and not capsule.is_open
+        ):
             return Response(
                 {"message": "Cannot access this capsule"},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -73,7 +77,7 @@ class CapsuleViewSet(ModelViewSet):
             )
         serializer = CapsuleUpdateSerializer(capsule)
 
-        if request.user == capsule.creator or request.user == capsule.contributors:
+        if request.user == capsule.creator or request.user in capsule.contributor.all():
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(
             {"message": "Cannot access this capsule"},
