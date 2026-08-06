@@ -55,7 +55,6 @@ class Sessions(models.Model):
     device_fingerprint = models.TextField()
     session_version = models.IntegerField(default=0)
     last_ip = models.TextField()
-    payload_data = models.TextField()
     last_active = models.DateTimeField(auto_now=True)
 
 

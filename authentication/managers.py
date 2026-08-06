@@ -4,7 +4,6 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import UserManager as DjangoUserManager
 
 if TYPE_CHECKING:
-    from authentication.models import User
     pass
 
 

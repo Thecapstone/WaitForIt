@@ -84,7 +84,6 @@ class ResendVerificationSerializer(serializers.Serializer):
 
 # pylint: disable=too-few-public-methods
 class PasswordResetSerializer(serializers.Serializer):
-    token = serializers.CharField()
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
 

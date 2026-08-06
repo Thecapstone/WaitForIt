@@ -17,6 +17,7 @@ from user_agents.parsers import parse
 from authentication.models import (
     EmailVerificationToken,
     PasswordResetToken,
+    Sessions,
     User as user_db,
 )
 
@@ -82,7 +83,9 @@ def session_token(user_id: int, role: str, session_version: int, request) -> str
     payload = {
         "user_id": user_id,
         "role": role,
-        "session_version": session_version + 1,
+        "ip_address": ip_address,
+        "fingerprint": fingerprint,
+        "session_version": session_version,
         "active_devices": active_devices,
     }
     # return hashlib.sha256(str(payload).encode("utf-8")).hexdigest()
@@ -100,13 +103,15 @@ def access_token(session_token: str) -> str:
 
         # 2. Extract necessary user identifiers
         user_id = session_payload.get("user_id")
+        user = user_db.objects.get(id=user_id)
+        session = Sessions.objects.only("session_version").get(user_id=user)
         session_version = session_payload.get("session_version")
         role = session_payload.get("role")
 
         if not user_id or not role:
             raise ValueError("Invalid session token payload data.")
 
-        if session_version != user_id.session_version:
+        if session_version != session.session_version:
             raise AuthenticationFailed("Token has been revoked.")
 
         # 3. Define access token payload with expiration (e.g., 15 minutes)
@@ -132,7 +137,7 @@ def generate_token(user_id, exp, token_type) -> str:
     jti = str(uuid4())
 
     EmailVerificationToken.objects.create(
-        user=user_id,
+        user_id=user_id,
         jti=jti,
         expires_at=exp,
     )
@@ -146,17 +151,42 @@ def generate_token(user_id, exp, token_type) -> str:
     return jwt.encode(payload, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
 
 
-def verify_verification_token(token) -> str:
-    """Verify user account using email token"""
+def verify_verification_token(token):
+    """Verify an email verification token."""
+
     try:
-        payload = jwt.decode(token, EMAIL_SECRET_KEY, algorithms=[ALGORITHM])
-        if payload.get("type") != "email_verification":
+        payload = jwt.decode(
+            token,
+            EMAIL_SECRET_KEY,
+            algorithms=[ALGORITHM],
+        )
+
+        if payload.get("type") != TokenTypes["EMAIL"]:
             raise ValueError("Invalid token type.")
+
+        verification_token = EmailVerificationToken.objects.select_related("user").get(
+            jti=payload["jti"]
+        )
+
+        if verification_token.used_at is not None:
+            raise ValueError("This verification link has already been used.")
+
+        if verification_token.expires_at <= timezone.now():
+            raise ValueError("Verification link has expired.")
+
+        verification_token.used_at = timezone.now()
+        verification_token.save(update_fields=["used_at"])
+
         return payload
+
+    except EmailVerificationToken.DoesNotExist as err:
+        raise ValueError("Invalid verification token.") from err
+
     except jwt.ExpiredSignatureError as err:
-        raise ValueError("Token has expired.") from err
+        raise ValueError("Verification link has expired.") from err
+
     except jwt.InvalidTokenError as err:
-        raise ValueError("Invalid token.") from err
+        raise ValueError("Invalid verification token.") from err
 
 
 def generate_password_reset_token(user_id, exp, token_type) -> str:
@@ -165,7 +195,7 @@ def generate_password_reset_token(user_id, exp, token_type) -> str:
     jti = uuid4()
 
     PasswordResetToken.objects.create(
-        user=user_id,
+        user_id=user_id,
         jti=jti,
         expires_at=exp,
     )
