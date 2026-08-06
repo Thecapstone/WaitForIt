@@ -45,6 +45,7 @@ env/
 
 # Logs
 *.log
+logs/
 
 # SQLite database files
 *.sqlite3
