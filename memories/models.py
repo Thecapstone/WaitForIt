@@ -13,6 +13,7 @@ def get_default_expiry():
 class Capsule(UniqueUserId):
     title = models.CharField(max_length=224)
     description = models.CharField(max_length=220, null=True, blank=True)
+    image = models.URLField(max_length=512, blank=True)
     creator = models.ForeignKey(
         "authentication.User", on_delete=models.CASCADE, related_name="capsule"
     )
@@ -41,6 +42,9 @@ class Capsule(UniqueUserId):
 
     def __repr__(self):
         return f"{self.title} is a private: {self.is_private}, capsule"
+
+    def __str__(self):
+        return self.title
 
 
 class Logs(UniqueUserId):
@@ -104,7 +108,7 @@ class Tag(models.Model):
 
 class Articles(UniqueUserId):
     title = models.CharField(max_length=120)
-    capsule_id = models.ForeignKey(
+    capsule = models.ForeignKey(
         "memories.Capsule", on_delete=models.CASCADE, related_name="articles"
     )
     log = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name="articles")
