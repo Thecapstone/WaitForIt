@@ -32,8 +32,6 @@ def creator():
     return User.objects.create_user(
         email="creator@example.com",
         password="password123",
-        first_name="John",
-        last_name="Doe",
     )
 
 
