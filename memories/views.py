@@ -92,7 +92,10 @@ class CapsuleViewSet(ModelViewSet):
     )
     def create_log(self, request, pk):
         capsule = capsule_db.objects.get(id=pk)
-        serializer = LogCreationSerializer(data=request.data)
+        serializer = LogCreationSerializer(
+            data=request.data,
+            context={"request": request},
+        )
         if serializer.is_valid():
             serializer.save(creator=request.user, capsule=capsule)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
