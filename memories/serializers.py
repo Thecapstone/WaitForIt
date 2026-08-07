@@ -4,7 +4,6 @@ import os
 
 from django.db import transaction
 from rest_framework import serializers
-from time_capsule.memories.tasks import queue_logs
 
 # from helpers import STREAM, redis_client
 from helpers.cloudinaryUtils import (
@@ -14,6 +13,7 @@ from helpers.cloudinaryUtils import (
     _upload_cloudinary_resource,
     get_default_expiry,
 )
+from inference.dispatcher import dispatch_log_created
 from memories.models import Capsule, Images, Logs, Teasers, Videos
 
 logger = logging.getLogger("waitforit")
@@ -65,7 +65,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get("request")
-        user = request.user if request else None
+        user = request.user if request else validated_data.get("creator")
 
         video_file = validated_data.pop("video", None)
         image_file = validated_data.pop("image", None)
@@ -80,7 +80,15 @@ class LogCreationSerializer(serializers.ModelSerializer):
             log_stamp = f"initial_log_{user.id}_{timestamp}"
             # image_link = cloudinary.utils.cloudinary_url("image_public_id")
             # video_link = cloudinary.utils.cloudinary_url("video_public_id")
-            log = Logs.objects.create(stamp=log_stamp, description=context)
+            log = Logs.objects.create(
+                stamp=log_stamp,
+                description=context,
+                title=validated_data["title"],
+                capsule=validated_data["capsule"],
+                creator=validated_data["creator"],
+                code_language=validated_data.pop("code_language", ""),
+                code_framework=validated_data.pop("code_framework", ""),
+            )
             try:
                 if video_file:
                     source_video_path = _save_upload_to_temp(video_file)
@@ -164,9 +172,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
                 for temp_path in temp_paths:
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
-            payload = {"log_id": log.id, "event": "log.created", "timestamp": datetime}
-            queue_logs.delay_on_commit(payload)
-            # redis_client.xadd(STREAM, payload)
+            dispatch_log_created(log.id)
         return log
 
 
@@ -198,10 +204,6 @@ class LogViewSerializer(serializers.ModelSerializer):
 class CapsuleUpdateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=224)
     description = serializers.CharField(max_length=220)
-    maturity_date = serializers.DateTimeField(
-        default=get_default_expiry, help_text="Time to open capsule"
-    )
-    creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Capsule
