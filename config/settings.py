@@ -14,6 +14,7 @@ from datetime import timedelta
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -65,6 +66,7 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     # local apps
     "authentication",
+    "inference",
     "memories",
     "payment",
 ]
@@ -136,6 +138,17 @@ CELERY_RESULT_BACKEND = "redis://localhost:6339/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+CELERY_DAILY_ARTICLE_HOUR = int(os.getenv("CELERY_DAILY_ARTICLE_HOUR", "23"))
+CELERY_DAILY_ARTICLE_MINUTE = int(os.getenv("CELERY_DAILY_ARTICLE_MINUTE", "59"))
+CELERY_BEAT_SCHEDULE = {
+    "generate-daily-articles": {
+        "task": "inference.tasks.generate_daily_articles",
+        "schedule": crontab(
+            hour=CELERY_DAILY_ARTICLE_HOUR,
+            minute=CELERY_DAILY_ARTICLE_MINUTE,
+        ),
+    },
+}
 
 LOGGING = {
     "version": 1,
