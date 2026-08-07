@@ -55,6 +55,9 @@ class Logs(UniqueUserId):
     stamp = models.CharField(max_length=120)
     title = models.CharField(max_length=100)
     description = models.TextField()
+    code_language = models.CharField(max_length=80, blank=True)
+    code_framework = models.CharField(max_length=80, blank=True)
+    is_generated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
@@ -108,10 +111,15 @@ class Tag(models.Model):
 
 class Articles(UniqueUserId):
     title = models.CharField(max_length=120)
-    capsule = models.ForeignKey(
+    capsule_id = models.ForeignKey(
         "memories.Capsule", on_delete=models.CASCADE, related_name="articles"
     )
     log = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name="articles")
+    logs = models.ManyToManyField(
+        Logs,
+        related_name="aggregated_articles",
+        blank=True,
+    )
     tags = models.ForeignKey(
         "memories.Tag", on_delete=models.DO_NOTHING, related_name="article"
     )

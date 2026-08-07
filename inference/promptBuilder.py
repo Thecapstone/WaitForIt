@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from .context import generate_article_context as ArticleContext
+from .context import ArticleContext
 
 
 class PromptBuilder:
@@ -32,13 +32,22 @@ class PromptBuilder:
             Framework:
             {context.framework}
 
-            Developer Log:
+            Development Session:
+            {context.starts_at:%Y-%m-%d %H:%M} - {context.ends_at:%H:%M}
 
-            {context.description}
+            Log Count:
+            {context.log_count}
+
+            Capsule Metadata:
+            {context.capsule_metadata or "Not specified"}
+
+            Development Timeline:
+
+            {context.timeline}
 
             Requirements:
 
-            - Expand naturally from the supplied log.
+            - Use the complete development timeline to write one cohesive article.
             - Do not invent implementation details.
             - Explain the motivation behind decisions.
             - Explain challenges where appropriate.
