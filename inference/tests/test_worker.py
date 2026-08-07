@@ -1,12 +1,17 @@
 from inference.redis_worker import Dispatcher
 
 
-def test_dispatcher_calls_article_worker(mocker):
-    worker = mocker.patch("inference.redis_worker.ArticleWorker.handle")
+def test_deprecated_dispatcher_routes_log_created(monkeypatch):
+    calls = []
+
+    monkeypatch.setattr(
+        "inference.dispatcher.dispatch_log_created",
+        lambda log_id: calls.append(log_id),
+    )
 
     Dispatcher.handle({
         "event": "log.created",
         "log_id": "5",
     })
 
-    worker.assert_called_once()
+    assert calls == ["5"]

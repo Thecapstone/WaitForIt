@@ -1,31 +1,36 @@
-import pytest
+from unittest.mock import AsyncMock, Mock
+
+from asgiref.sync import async_to_sync
 
 from inference.clients.openRouter import OpenRouterClient
 
 
-@pytest.mark.asyncio
-async def test_generate_posts_to_openrouter(mocker):
-    fake_response = mocker.AsyncMock()
-
-    fake_response.json.return_value = {"choices": []}
+def test_generate_posts_to_openrouter(monkeypatch):
+    fake_response = Mock()
+    fake_response.json.return_value = {"choices": [{"message": {"content": "ok"}}]}
     fake_response.raise_for_status.return_value = None
 
-    post = mocker.AsyncMock(return_value=fake_response)
+    post = AsyncMock(return_value=fake_response)
 
-    mock_client = mocker.AsyncMock()
+    mock_client = Mock()
     mock_client.post = post
 
-    mocker.patch(
-        "httpx.AsyncClient",
-        return_value=mocker.AsyncMock(
-            __aenter__=mocker.AsyncMock(return_value=mock_client),
-            __aexit__=mocker.AsyncMock(return_value=None),
-        ),
-    )
+    class FakeAsyncClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return mock_client
+
+        async def __aexit__(self, *args):
+            return None
+
+    monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
 
     client = OpenRouterClient()
 
-    await client.generate(
+    async_to_sync(client.generate)(
         system_prompt="system",
         prompt="user",
         model="gpt",
