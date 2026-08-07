@@ -1,35 +1,21 @@
-from helpers.redisClient import redis_client
+"""
+Deprecated Redis worker entrypoint.
 
-from .clients.base import BaseLLMClient
-
-STREAM = "capsule.jobs"
-GROUP = "article-workers"
-CONSUMER = "worker-1"
+Article generation is now orchestrated by Celery tasks in ``inference.tasks``.
+This module remains as a compatibility shim for old imports and should not be
+used to trigger article generation.
+"""
 
 
 class ArticleWorker:
     @staticmethod
     def handle(payload):
-        log_id = int(payload["log_id"])
+        from inference.dispatcher import dispatch_log_created
 
-        BaseLLMClient.generate_article(log_id)
-
-
-# class SummaryWorker:
-
-#     @staticmethod
-#     def handle(payload):
-
-#         InferenceService.generate_summary(
-#             payload["article_id"]
-#         )
+        dispatch_log_created(payload["log_id"])
 
 
 class Dispatcher:
-    # summary_handlers = {
-    #     "log.created": ArticleWorker.handle,
-    #     "article.generated": SummaryWorker.handle,
-    # }
     article_handlers = {
         "log.created": ArticleWorker.handle,
     }
@@ -43,34 +29,4 @@ class Dispatcher:
 
     @staticmethod
     def dispatch(payload):
-        event = payload["event"]
-
-        if event == "log.created":
-            ...
-
-        elif event == "article.generated":
-            ...
-
-        else:
-            raise ValueError(event)
-
-
-while True:
-    messages = redis_client.xreadgroup(
-        GROUP,
-        CONSUMER,
-        {STREAM: ">"},
-        count=1,
-        block=5000,
-    )
-
-    if not messages:
-        continue
-
-    stream_name, events = messages[0]
-
-    message_id, payload = events[0]
-
-    Dispatcher.dispatch(payload)
-
-    print(payload)
+        Dispatcher.handle(payload)
