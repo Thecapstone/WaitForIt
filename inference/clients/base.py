@@ -1,14 +1,14 @@
+from collections.abc import Sequence
 import os
 
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 
-from helpers.redisClient import STREAM, redis_client
 from inference.clients.openRouter import OpenRouterClient
 from inference.context import generate_article_context
 from inference.promptBuilder import PromptBuilder
 from inference.responseProcessor import ResponseProcessor
 from inference.systemPrompt import system_prompt
-from memories.models import Articles
+from memories.models import Articles, Logs, Tag
 
 ai_model = os.getenv("DEFAULT_MODEL")
 model_temperature = float(os.getenv("TEMPERATURE", "0.7"))
@@ -17,45 +17,25 @@ max_tokens = int(os.getenv("MAX_TOKENS", "4096"))
 
 class InferenceService:
     """
-    Coordinates the complete article generation pipeline.
+    Coordinates article generation for an ordered batch of logs.
 
-    Flow
-
-    Log
-        ↓
-    Context
-        ↓
-    Prompt Builder
-        ↓
-    OpenRouter
-        ↓
-    Response Processor
-        ↓
-    Save Article
-        ↓
-    Publish Redis Event
+    Celery owns orchestration. This service only builds the context and prompt,
+    calls the LLM client, processes the response, and saves the article.
     """
 
     @staticmethod
-    async def generate_article(log_id: int) -> Articles:
+    def _generate_article(logs: Sequence[Logs] | Sequence[str]) -> Articles:
         """
-        Generate an article from a developer log.
-
-        Returns
-        -------
-        Articles
-            The newly created Article instance.
+        Generate one article from a developer-log batch.
         """
 
-        context = generate_article_context(log_id)
+        context = generate_article_context(logs)
 
         system = system_prompt(context.previous_articles)
-
         prompt = PromptBuilder.article(context)
-
         client = OpenRouterClient()
 
-        response = await client.generate(
+        response = async_to_sync(client.generate)(
             system_prompt=system,
             prompt=prompt,
             model=ai_model,
@@ -64,31 +44,30 @@ class InferenceService:
         )
 
         article_response = ResponseProcessor.article(response)
+        tag, _ = Tag.objects.get_or_create(name="daily-development")
 
         article = Articles.objects.create(
-            capsule=context.capsule,
-            title=context.title,
-            content=article_response.content,
-            prompt_tokens=article_response.prompt_tokens,
-            completion_tokens=article_response.completion_tokens,
-            total_tokens=article_response.total_tokens,
-            finish_reason=article_response.finish_reason,
-            model=article_response.model,
+            capsule_id=context.capsule,
+            log=context.primary_log,
+            tags=tag,
+            title=context.title[:120],
+            body=article_response.content,
         )
+        article.logs.set(context.logs)
 
-        redis_client.xadd(
-            STREAM,
-            {
-                "event": "article.generated",
-                "article_id": str(article.id),
-            },
-        )
+        context.capsule.previous_article = article_response.content
+        context.capsule.save(update_fields=["previous_article"])
 
         return article
 
     @staticmethod
-    def generate_article_sync(log_id: int) -> Articles:
+    async def generate_article(logs: Sequence[Logs] | Sequence[str]) -> Articles:
+        return await sync_to_async(InferenceService._generate_article)(logs)
+
+    @staticmethod
+    def generate_article_sync(logs: Sequence[Logs] | Sequence[str]) -> Articles:
         """
-        Synchronous wrapper for Redis workers.
+        Synchronous wrapper for Celery workers.
         """
-        return async_to_sync(InferenceService.generate_article)(log_id)
+
+        return InferenceService._generate_article(logs)
