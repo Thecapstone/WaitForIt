@@ -117,8 +117,7 @@ def logs_for_capsule_day(
     starts_at, ends_at = day_bounds(day)
 
     return (
-        Logs.objects
-        .select_related("capsule", "creator")
+        Logs.objects.select_related("capsule", "creator")
         .filter(
             capsule_id=capsule_id,
             created_at__gte=starts_at,
@@ -132,8 +131,7 @@ def logs_for_capsule_day(
 def daily_batches(day: date | None = None) -> list[DailyLogBatch]:
     starts_at, ends_at = day_bounds(day)
     capsule_ids = (
-        Logs.objects
-        .filter(
+        Logs.objects.filter(
             created_at__gte=starts_at,
             created_at__lte=ends_at,
             is_generated=False,
