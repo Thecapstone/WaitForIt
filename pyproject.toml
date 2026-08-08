@@ -105,7 +105,7 @@ dev = [
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.test_settings"
 # Automatically append coverage parameters whenever "uv run pytest" is executed
-addopts = "--cov=. --cov-report=term-missing --cov-report=html"
+addopts = "--cov=. --cov-report=term-missing"
 pythonpath = ["."]
 
 python_files = [
