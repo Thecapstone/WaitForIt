@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "authentication",
     "inference",
     "memories",
+    "waitlist",
     "payment",
 ]
 
