@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     # local apps
-    "authentication",
+    "authentication.apps.AuthenticationConfig",
     "inference",
     "memories",
     "waitlist",
