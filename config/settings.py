@@ -42,7 +42,12 @@ DB_USER = env("DB_USER")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    ".onrender.com",
+    "localhost",
+    "127.0.0.1", 
+    "https://wait-for-it.up.railway.app/"
+]
 
 
 # Application definition
