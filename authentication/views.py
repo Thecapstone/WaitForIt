@@ -147,7 +147,7 @@ class AuthViewSet(GenericViewSet):
         },
     )
     @action(
-        detail=True,
+        detail=False,
         methods=["POST"],
         url_path="create-tester",
         permission_classes=[permissions.IsAdminUser],
@@ -182,7 +182,7 @@ class AuthViewSet(GenericViewSet):
         )
 
     @action(
-        detail=True,
+        detail=False,
         methods=["POST"],
         url_path="create-admin",
         permission_classes=[permissions.IsAdminUser],
@@ -263,7 +263,7 @@ class AuthViewSet(GenericViewSet):
         user_session.session_version = F("session_version") + 1
         user_session.save(update_fields=["session_version"])
         refresh = session_token(user.pk, role, user_session.session_version, request)
-        access_token(refresh)
+        access = access_token(refresh)
 
         user_session.session_token = refresh
         user_session.device_fingerprint = fingerprint
@@ -283,7 +283,7 @@ class AuthViewSet(GenericViewSet):
             status=status.HTTP_200_OK,
         )
         for key, val in [
-            ("access_token", access_token),
+            ("access_token", access),
             ("refresh_token", str(refresh)),
             ("fingerprint", user_session.device_fingerprint),
         ]:
@@ -329,7 +329,7 @@ class AuthViewSet(GenericViewSet):
         response = Response(
             {"message": "You have been logged out"}, status=status.HTTP_200_OK
         )
-        for key in ["session_token", "refresh_token", "fingerprint"]:
+        for key in ["access_token", "refresh_token", "fingerprint"]:
             response.delete_cookie(key)
         return response
 
@@ -359,7 +359,7 @@ class AuthViewSet(GenericViewSet):
                 expiry,
                 token_type=TokenTypes["PASSWORD"],
             )
-            reset_link = f"{Host}:8000/api/auth/password-reset/{token}/"
+            reset_link = f"{Host}/api/auth/password-reset/{token}/"
 
             try:
                 send_password_reset_email(
