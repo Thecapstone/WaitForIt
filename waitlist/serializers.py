@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 
 from waitlist.models import WaitList
@@ -25,5 +24,3 @@ class WaitListSerializer(serializers.ModelSerializer):
 
     def validate_fullname(self, value):
         return value.strip()
-
-

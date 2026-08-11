@@ -62,8 +62,7 @@ class WaitListViewSet(viewsets.GenericViewSet):
         """
 
         activity = (
-            WaitList.objects
-            .annotate(signup_date=TruncDate("created_at"))
+            WaitList.objects.annotate(signup_date=TruncDate("created_at"))
             .values("signup_date")
             .annotate(signups=Count("id"))
             .order_by("signup_date")
@@ -77,11 +76,9 @@ class WaitListViewSet(viewsets.GenericViewSet):
             for item in activity
         ]
 
-        return Response(
-            {
-                "data": data,
-            }
-        )
+        return Response({
+            "data": data,
+        })
 
     @action(
         detail=False,
@@ -97,35 +94,28 @@ class WaitListViewSet(viewsets.GenericViewSet):
 
         total_signups = WaitList.objects.count()
 
-        developers = WaitList.objects.filter(
-            is_develoeper=True
-        ).count()
+        developers = WaitList.objects.filter(is_develoeper=True).count()
 
-        non_developers = WaitList.objects.filter(
-            is_develoeper=False
-        ).count()
+        non_developers = WaitList.objects.filter(is_develoeper=False).count()
 
         role_breakdown = (
-            WaitList.objects
-            .values("role")
+            WaitList.objects.values("role")
             .annotate(count=Count("id"))
             .order_by("-count")
         )
 
-        return Response(
-            {
-                "total_signups": total_signups,
-                "developers": developers,
-                "non_developers": non_developers,
-                "role_breakdown": [
-                    {
-                        "role": item["role"],
-                        "count": item["count"],
-                    }
-                    for item in role_breakdown
-                ],
-            }
-        )
+        return Response({
+            "total_signups": total_signups,
+            "developers": developers,
+            "non_developers": non_developers,
+            "role_breakdown": [
+                {
+                    "role": item["role"],
+                    "count": item["count"],
+                }
+                for item in role_breakdown
+            ],
+        })
 
     @action(
         detail=False,
@@ -143,9 +133,7 @@ class WaitListViewSet(viewsets.GenericViewSet):
 
         if not key or not value:
             return Response(
-                {
-                    "detail": "Both 'key' and 'value' are required."
-                },
+                {"detail": "Both 'key' and 'value' are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -157,10 +145,7 @@ class WaitListViewSet(viewsets.GenericViewSet):
                     "detail": (
                         f"Invalid filter key '{key}'. "
                         f"Allowed keys are: "
-                        f"{', '.join(
-                            item.value
-                            for item in WaitListFilterKey
-                        )}."
+                        f"{', '.join(item.value for item in WaitListFilterKey)}."
                     )
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -169,27 +154,18 @@ class WaitListViewSet(viewsets.GenericViewSet):
         queryset = WaitList.objects.all()
 
         if filter_key == WaitListFilterKey.ROLE:
-            queryset = queryset.filter(
-                role__iexact=value
-            )
+            queryset = queryset.filter(role__iexact=value)
 
         elif filter_key == WaitListFilterKey.DATE:
             try:
                 filter_date = date.fromisoformat(value)
             except ValueError:
                 return Response(
-                    {
-                        "detail": (
-                            "Invalid date format. "
-                            "Expected YYYY-MM-DD."
-                        )
-                    },
+                    {"detail": ("Invalid date format. Expected YYYY-MM-DD.")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            queryset = queryset.filter(
-                created_at__date=filter_date
-            )
+            queryset = queryset.filter(created_at__date=filter_date)
 
         queryset = queryset.order_by("-created_at")
 
@@ -198,13 +174,11 @@ class WaitListViewSet(viewsets.GenericViewSet):
             many=True,
         )
 
-        return Response(
-            {
-                "filter": {
-                    "key": filter_key.value,
-                    "value": value,
-                },
-                "count": queryset.count(),
-                "data": serializer.data,
-            }
-        )
+        return Response({
+            "filter": {
+                "key": filter_key.value,
+                "value": value,
+            },
+            "count": queryset.count(),
+            "data": serializer.data,
+        })
