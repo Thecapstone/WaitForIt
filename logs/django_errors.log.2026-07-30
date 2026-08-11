@@ -1,0 +1,819 @@
+2026-07-30 09:22:21,493 [ERROR] django.request: Internal Server Error: /api/auth/register/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 89, in register_user
+    success = send_user_verification_email(user)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\helpers\emailClient.py", line 111, in send_user_verification_email
+    timezone.now() + timedelta(hours=24),
+    ^^^^^^^^^^^^
+AttributeError: type object 'datetime.timezone' has no attribute 'now'
+2026-07-30 09:22:32,409 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiI5ZDQ5MzBjNS02NzBjLTRmZWUtYjBkMy1hY2YyZmE4NmRiZDQiLCJleHAiOjE3ODU0MDMzNTJ9.iUiQgtMxlb7Uw59g9B_Hb8TvhKXCnTDORjYhGTueCqg/
+2026-07-30 09:32:41,535 [ERROR] django.request: Internal Server Error: /api/auth/register/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 89, in register_user
+    success = send_user_verification_email(user)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\helpers\emailClient.py", line 110, in send_user_verification_email
+    token = generate_token(
+            ^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\tokens.py", line 134, in generate_token
+    EmailVerificationToken.objects.create(
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 667, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 566, in __init__
+    _setattr(self, field.name, rel_obj)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 287, in __set__
+    raise ValueError(
+ValueError: Cannot assign "1": "EmailVerificationToken.user" must be a "User" instance.
+2026-07-30 09:32:52,110 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiJmMGI4MjUwMC0wZTAwLTQzYjUtODJiNy04YjljZDRlYmU1MzkiLCJleHAiOjE3ODU0MDM5NzJ9.Sc91NeNMROI2U6FUphQRzmwuZf1h21vh7mXl_-L8psU/
+2026-07-30 09:58:18,306 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 213, in user_login
+    role = validated_data["role"]
+           ~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'role'
+2026-07-30 09:58:21,951 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 213, in user_login
+    role = validated_data["role"]
+           ~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'role'
+2026-07-30 09:58:23,696 [ERROR] django.request: Internal Server Error: /api/auth/forgot-password/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 351, in forgot_password
+    token = generate_password_reset_token(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\tokens.py", line 194, in generate_password_reset_token
+    PasswordResetToken.objects.create(
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 667, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 566, in __init__
+    _setattr(self, field.name, rel_obj)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 287, in __set__
+    raise ValueError(
+ValueError: Cannot assign "1": "PasswordResetToken.user" must be a "User" instance.
+2026-07-30 10:05:28,718 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 213, in user_login
+    role = validated_data["role"]
+           ~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'role'
+2026-07-30 10:05:32,302 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 213, in user_login
+    role = validated_data["role"]
+           ~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'role'
+2026-07-30 10:05:56,343 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiJkZTE5ZTI4OC1mZWU0LTRlYjItYjQ5YS1lYTIzMzEwZTE1NGIiLCJleHAiOjE3ODU0MDU5NTZ9.vFW6pCNY9Z3T90waSKFJ0qEeO9AmgAOnOMC2wV7DxWs/
+2026-07-30 10:16:27,913 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 987, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 639, in get
+    raise self.model.DoesNotExist(
+authentication.models.Sessions.DoesNotExist: Sessions matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 258, in user_login
+    user_session, _created = session_db.objects.get_or_create(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 994, in get_or_create
+    return self.create(**params), True
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 667, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 566, in __init__
+    _setattr(self, field.name, rel_obj)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 287, in __set__
+    raise ValueError(
+ValueError: Cannot assign "1": "Sessions.user_id" must be a "User" instance.
+2026-07-30 10:16:36,640 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 10:16:44,002 [ERROR] django.request: Internal Server Error: /api/auth/reset-password/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 412, in password_reset
+    token = request.user.password_reset_token
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AnonymousUser' object has no attribute 'password_reset_token'
+2026-07-30 10:16:59,763 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiJkZTZmNjk5MC03YjZhLTQ3YmItYTE0YS0zN2RhZGEzYzIzYjgiLCJleHAiOjE3ODU0MDY2MTl9.tFy85z3elPyAhVBuluy9UitE0CqgmgwPaXPK9si_cFs/
+2026-07-30 10:20:15,769 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 987, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 639, in get
+    raise self.model.DoesNotExist(
+authentication.models.Sessions.DoesNotExist: Sessions matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 258, in user_login
+    user_session, _created = session_db.objects.get_or_create(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 994, in get_or_create
+    return self.create(**params), True
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 667, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 566, in __init__
+    _setattr(self, field.name, rel_obj)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 287, in __set__
+    raise ValueError(
+ValueError: Cannot assign "1": "Sessions.user_id" must be a "User" instance.
+2026-07-30 10:20:22,796 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 10:20:30,530 [ERROR] django.request: Internal Server Error: /api/auth/reset-password/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 412, in password_reset
+    token = request.user.password_reset_token
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AnonymousUser' object has no attribute 'password_reset_token'
+2026-07-30 10:20:46,094 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiIyMDNlMDRlZC01NTFhLTRkMmItOTRlMC04MzRmMzA0YmFjZmUiLCJleHAiOjE3ODU0MDY4NDZ9.sPyP4WuSIMN3bXbwIoCXK8EEcNCXkP-qi-plrUuxsPc/
+2026-07-30 10:22:32,899 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 263, in user_login
+    access = access_token(refresh)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\tokens.py", line 109, in access_token
+    if session_version != user_id.session_version:
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'session_version'
+2026-07-30 10:22:38,979 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 10:22:46,097 [ERROR] django.request: Internal Server Error: /api/auth/reset-password/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 412, in password_reset
+    token = request.user.password_reset_token
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AnonymousUser' object has no attribute 'password_reset_token'
+2026-07-30 10:23:00,683 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiJhNDIwMDA1YS03ZTVjLTQ3NjctYmRmNS0yYTI2NmI4NDNhM2QiLCJleHAiOjE3ODU0MDY5ODB9.7flVaHRyAvygognEPdLuUaiXhzj3lhTJ4oyiT3f9H1U/
+2026-07-30 11:00:46,038 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 265, in user_login
+    access = access_token(refresh)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\tokens.py", line 110, in access_token
+    if session_version != user.session_version:
+                          ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'session_version'
+2026-07-30 11:00:57,241 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 11:01:09,651 [ERROR] django.request: Internal Server Error: /api/auth/reset-password/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 413, in password_reset
+    token = request.user.password_reset_token
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AnonymousUser' object has no attribute 'password_reset_token'
+2026-07-30 11:01:28,970 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiIyYTU4ZWIzYi0zNmRhLTQ2NjYtYTcxNi02MmUwNmNjOTQ5ZTIiLCJleHAiOjE3ODU0MDkyODh9.gAdmhMoz8PmQFBcrjgISF9DzezGsJItfiT7RuiUVeNI/
+2026-07-30 14:05:27,150 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 269, in user_login
+    user_session.last_ip = session_token.ip_address
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'function' object has no attribute 'ip_address'
+2026-07-30 14:05:34,966 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 14:05:43,461 [WARNING] django.request: Not Found: /api/auth/reset-password/
+2026-07-30 14:05:58,917 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiJlMGQxMzVlNC01ZmNjLTQ0ZjQtYjQ4Ny1hMDAzMGEzOWJlOGIiLCJleHAiOjE3ODU0MjAzNTh9.otEw9ctrjJahLuG8Jz81m3w39GANHeEXbNxNwV7pHFU/
+2026-07-30 15:58:36,609 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 269, in user_login
+    user_session.last_ip = session_token.ip_address
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'function' object has no attribute 'ip_address'
+2026-07-30 15:58:43,632 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 15:58:51,263 [WARNING] django.request: Bad Request: /api/auth/password-reset/{token}/
+2026-07-30 15:59:05,666 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiJjMDFjNTg0Ni1iNDdhLTRkMGQtYTJiZi1hMjRmODI0MjgyZmMiLCJleHAiOjE3ODU0MjcxNDV9.nQZ2kg1Dkw-0wF3n0EobDvOS9kXje59khbAWBiojIt0/
+2026-07-30 16:17:10,276 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 253, in user_login
+    fingerprint = hashlib.sha256(uuid4().bytes).hexdigest()
+                  ^^^^^^^
+NameError: name 'hashlib' is not defined. Did you forget to import 'hashlib'
+2026-07-30 16:17:17,156 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 16:17:23,976 [WARNING] django.request: Bad Request: /api/auth/password-reset/{token}/
+2026-07-30 16:17:38,529 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiI2MzVmYmE4Ni03MjdkLTQ0OGUtYmNiMi1mN2ZjNmQ2MDk0NDkiLCJleHAiOjE3ODU0MjgyNTh9._PdCPTg1c4ottC-wqdTP5k023dbVAd3gdSBANErgCvM/
+2026-07-30 17:06:18,785 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 253, in user_login
+    fingerprint = hashlib.sha256(uuid4().bytes).hexdigest()
+                                 ^^^^^
+NameError: name 'uuid4' is not defined
+2026-07-30 17:06:26,146 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 17:06:34,099 [WARNING] django.request: Bad Request: /api/auth/password-reset/{token}/
+2026-07-30 17:06:48,668 [WARNING] django.request: Not Found: /api/auth/verify/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsInR5cGUiOiJlbWFpbF92ZXJpZmljYXRpb24iLCJqdGkiOiJjOTRkOGYxNS05ODc5LTRkOTQtYTZjNC0xMDk3ZGNiNzk0NmMiLCJleHAiOjE3ODU0MzEyMDh9.jUeY7lChyjwozJeW0JMlBTBTwgD2a3dnOMDpFE7_sOQ/
+2026-07-30 17:32:28,313 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 274, in user_login
+    user_session.payload_data = refresh.payload
+                                ^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'payload'
+2026-07-30 17:32:35,218 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 17:32:43,970 [ERROR] django.request: Internal Server Error: /api/auth/password-reset/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ0eXBlIjoicGFzc3dvcmRfcmVzZXQiLCJqdGkiOiJjNmYzYTQ3NS1mZDhjLTQ0N2ItODdlNi0zYmM3NDFmMzgyOWUiLCJleHAiOjE3ODU0MzI3NjJ9.Ps0Cyqbbinjz1vy7P44Q4SUUA_zxE5q1_IxesGNbyZA/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 425, in password_reset
+    user.session_version += 1
+    ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'session_version'
+2026-07-30 17:54:37,798 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 987, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 639, in get
+    raise self.model.DoesNotExist(
+authentication.models.Sessions.DoesNotExist: Sessions matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 359, in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: NOT NULL constraint failed: authentication_sessions.payload_data
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 260, in user_login
+    user_session, _created = session_db.objects.get_or_create(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 994, in get_or_create
+    return self.create(**params), True
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 669, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 874, in save
+    self.save_base(
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 966, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 1220, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\query.py", line 1918, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1925, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 359, in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: NOT NULL constraint failed: authentication_sessions.payload_data
+2026-07-30 17:54:45,901 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 17:56:51,697 [ERROR] django.request: Internal Server Error: /api/auth/login/
+Traceback (most recent call last):
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\authentication\views.py", line 276, in user_login
+    user_session.save(update_fields=["session_token", "device_fingerprint", "payload_data","last_ip", "last_active"])
+  File "C:\Users\HP\OneDrive\Desktop\testing-for-hackathon\testing-wfi-app\time_capsule\.venv\Lib\site-packages\django\db\models\base.py", line 851, in save
+    raise ValueError(
+ValueError: The following fields do not exist in this model, are m2m fields, primary keys, or are non-concrete fields: payload_data
+2026-07-30 17:56:58,445 [WARNING] django.request: Forbidden: /api/auth/login/
+2026-07-30 18:06:50,106 [WARNING] django.request: Forbidden: /api/auth/login/
