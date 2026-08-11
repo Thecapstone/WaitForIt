@@ -114,7 +114,7 @@ def send_user_verification_email(user):
         TokenTypes["EMAIL"],
     )
 
-    verification_link = f"{Host}:8000/api/auth/verify/{token}/"
+    verification_link = f"{Host}/api/auth/verify/{token}/"
 
     return send_verification_email(
         receiver_email=user.email,
