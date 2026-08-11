@@ -10,7 +10,7 @@ class WaitListSerializer(serializers.ModelSerializer):
             "id",
             "fullname",
             "email",
-            "is_develoeper",
+            "is_developer",
             "role",
             "created_at",
         ]

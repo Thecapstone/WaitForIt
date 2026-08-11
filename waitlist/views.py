@@ -94,9 +94,9 @@ class WaitListViewSet(viewsets.GenericViewSet):
 
         total_signups = WaitList.objects.count()
 
-        developers = WaitList.objects.filter(is_develoeper=True).count()
+        developers = WaitList.objects.filter(is_developer=True).count()
 
-        non_developers = WaitList.objects.filter(is_develoeper=False).count()
+        non_developers = WaitList.objects.filter(is_developer=False).count()
 
         role_breakdown = (
             WaitList.objects.values("role")
