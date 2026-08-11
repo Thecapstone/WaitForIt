@@ -46,7 +46,7 @@ ALLOWED_HOSTS = [
     ".onrender.com",
     "localhost",
     "127.0.0.1", 
-    "https://wait-for-it.up.railway.app/"
+    "wait-for-it.up.railway.app/"
 ]
 
 
