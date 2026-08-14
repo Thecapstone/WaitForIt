@@ -1,25 +1,35 @@
 from django.urls import path
 
 from waitlist.views import (
-    WaitListActivityView,
-    WaitListFilterView,
-    WaitListSignupView,
+    AnalyticsAPIView,
+    AnalyticsEventAPIView,
+    EmailPipelineLogsAPIView,
+    EmailPipelineSendAPIView,
+    EmailTemplateAPIView,
+    WaitlistCollectionAPIView,
+    WaitlistDetailAPIView,
+    WaitlistExportAPIView,
 )
 
 urlpatterns = [
+    path("waitlist", WaitlistCollectionAPIView.as_view(), name="waitlist-collection"),
+    path("waitlist/export", WaitlistExportAPIView.as_view(), name="waitlist-export"),
     path(
-        "waitlist/",
-        WaitListSignupView.as_view(),
-        name="waitlist-signup",
+        "waitlist/<str:subscriber_id>",
+        WaitlistDetailAPIView.as_view(),
+        name="waitlist-detail",
     ),
     path(
-        "waitlist/activity/",
-        WaitListActivityView.as_view(),
-        name="waitlist-activity",
+        "email-pipeline/logs",
+        EmailPipelineLogsAPIView.as_view(),
+        name="email-pipeline-logs",
     ),
     path(
-        "waitlist/filter/",
-        WaitListFilterView.as_view(),
-        name="waitlist-filter",
+        "email-pipeline/send",
+        EmailPipelineSendAPIView.as_view(),
+        name="email-pipeline-send",
     ),
+    path("email-template", EmailTemplateAPIView.as_view(), name="email-template"),
+    path("analytics", AnalyticsAPIView.as_view(), name="analytics"),
+    path("analytics/event", AnalyticsEventAPIView.as_view(), name="analytics-event"),
 ]
