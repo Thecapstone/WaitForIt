@@ -86,12 +86,18 @@ class CapsuleViewSet(ModelViewSet):
 
     @action(
         detail=True,
-        methods=["get"],
+        methods=["post"],
         url_path="create-log",
         permission_classes=[permissions.IsAuthenticated],
     )
     def create_log(self, request, pk):
-        capsule = capsule_db.objects.get(id=pk)
+        try:
+            capsule = capsule_db.objects.get(id=pk)
+        except capsule_db.DoesNotExist:
+            return Response(
+                {"Capsule": "Capsule does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         serializer = LogCreationSerializer(
             data=request.data,
             context={"request": request},
