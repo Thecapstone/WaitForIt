@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+import auto_prefetch
 from django.db import models
 from django.utils import timezone
 
@@ -60,6 +61,38 @@ class Logs(UniqueUserId):
     is_generated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
+
+
+class CapsuleAuditLog(UniqueUserId):
+    class Event(models.TextChoices):
+        CREATED = "CREATED", "Capsule created"
+        VIEWED = "VIEWED", "Capsule viewed"
+        UPDATED = "UPDATED", "Capsule updated"
+        LOG_ADDED = "LOG_ADDED", "Log added to capsule"
+        ARTICLE_GENERATED = "ARTICLE_GENERATED", "Article generated for capsule"
+        MEMBER_ADDED = "MEMBER_ADDED", "Member added to capsule"
+        MEMBER_REMOVED = "MEMBER_REMOVED", "Member removed from capsule"
+        CONTRIBUTOR_ADDED = "CONTRIBUTOR_ADDED", "Contributor added to capsule"
+        CONTRIBUTOR_REMOVED = "CONTRIBUTOR_REMOVED", "Contributor removed from capsule"
+
+    capsule = models.ForeignKey(
+        Capsule, on_delete=models.CASCADE, related_name="audit_logs"
+    )
+    actor = models.ForeignKey(
+        "authentication.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="capsule_audit_logs",
+    )
+    event = models.CharField(max_length=32, choices=Event.choices)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta(auto_prefetch.Model.Meta):  # type: ignore[reportIncompatibleVariableOverride]
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["capsule", "created_at"]),
+        ]
 
 
 class Videos(UniqueUserId):

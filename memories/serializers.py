@@ -14,9 +14,24 @@ from helpers.cloudinaryUtils import (
     get_default_expiry,
 )
 from inference.dispatcher import dispatch_log_created
-from memories.models import Capsule, Images, Logs, Teasers, Videos
+from memories.models import (
+    Capsule,
+    CapsuleAuditLog,
+    Images,
+    Logs,
+    Teasers,
+    Videos,
+)
 
 logger = logging.getLogger("waitforit")
+
+
+class CapsuleAuditLogSerializer(serializers.ModelSerializer):
+    actor = serializers.StringRelatedField(allow_null=True)
+
+    class Meta:
+        model = CapsuleAuditLog
+        fields = ["id", "event", "actor", "metadata", "created_at"]
 
 
 class CapsuleCreationSerializer(serializers.ModelSerializer):
@@ -163,7 +178,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
                 _cleanup_cloudinary_resources(uploaded_resources)
                 logger.warning(
                     "CLOUDINARY_RESOURCE_UPLOAD_FAILED | request=%s | error=%s ",
-                    request.id,
+                    getattr(request, "id", None),
                     exc,
                 )
                 raise exc

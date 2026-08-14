@@ -8,7 +8,8 @@ from inference.context import generate_article_context
 from inference.promptBuilder import PromptBuilder
 from inference.responseProcessor import ResponseProcessor
 from inference.systemPrompt import system_prompt
-from memories.models import Articles, Logs, Tag
+from memories.audit import record_capsule_event
+from memories.models import Articles, CapsuleAuditLog, Logs, Tag
 
 ai_model = os.getenv("DEFAULT_MODEL")
 model_temperature = float(os.getenv("TEMPERATURE", "0.7"))
@@ -57,6 +58,11 @@ class InferenceService:
 
         context.capsule.previous_article = article_response.content
         context.capsule.save(update_fields=["previous_article"])
+
+        record_capsule_event(
+            context.capsule,
+            CapsuleAuditLog.Event.ARTICLE_GENERATED,
+        )
 
         return article
 

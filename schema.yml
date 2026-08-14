@@ -388,6 +388,29 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/memories/{id}/audit-logs/:
+    get:
+      operationId: memories_audit_logs_retrieve
+      description: Read a capsule's audit trail. Only the creator or contributors
+        may view it.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          description: unique id generator for anonymous usernames
+        required: true
+      tags:
+      - memories
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapsuleCreation'
+          description: ''
   /api/memories/{id}/create-log/:
     post:
       operationId: memories_create_log_create

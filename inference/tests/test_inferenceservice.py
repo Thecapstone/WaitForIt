@@ -5,7 +5,7 @@ import pytest
 from authentication.models import User
 from inference.clients.base import InferenceService
 from inference.responseProcessor import ArticleResponse
-from memories.models import Articles, Capsule, Logs, Tag
+from memories.models import Articles, Capsule, CapsuleAuditLog, Logs, Tag
 
 pytestmark = pytest.mark.django_db
 
@@ -81,3 +81,6 @@ def test_generate_article_sync_creates_one_article_for_log_batch(
     assert article.tags == Tag.objects.get(name="daily-development")
     capsule.refresh_from_db()
     assert capsule.previous_article == "Generated article"
+    assert capsule.audit_logs.filter(
+        event=CapsuleAuditLog.Event.ARTICLE_GENERATED
+    ).exists()

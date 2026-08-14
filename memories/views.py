@@ -7,8 +7,10 @@ import rest_framework.status as status
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import ModelViewSet
 
-from memories.models import Capsule as capsule_db
+from memories.audit import record_capsule_event
+from memories.models import Capsule, Capsule as capsule_db, CapsuleAuditLog
 from memories.serializers import (
+    CapsuleAuditLogSerializer,
     CapsuleCreationSerializer,
     # CapsuleJoinSerializer,
     # CapsulePreviewSerializer,
@@ -30,9 +32,17 @@ class CapsuleViewSet(ModelViewSet):
     serializer_class = CapsuleCreationSerializer
 
     def create(self, request):
-        serializer = CapsuleCreationSerializer(data=request.data)
+        serializer = CapsuleCreationSerializer(
+            data=request.data,
+            context={"request": request},
+        )
         if serializer.is_valid():
-            serializer.save(creator=request.user)
+            capsule: Capsule = serializer.save(creator=request.user)
+            record_capsule_event(
+                capsule,
+                CapsuleAuditLog.Event.CREATED,
+                actor=request.user,
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -51,12 +61,17 @@ class CapsuleViewSet(ModelViewSet):
         if (
             request.user != capsule.creator
             and request.user not in capsule.member.all()
-            and not capsule.is_open
+            and not capsule.is_open()
         ):
             return Response(
                 {"message": "Cannot access this capsule"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+        record_capsule_event(
+            capsule,
+            CapsuleAuditLog.Event.VIEWED,
+            actor=request.user,
+        )
         return Response(
             {
                 "data": serializer.data,
@@ -65,7 +80,7 @@ class CapsuleViewSet(ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def update(self, request, pk):
+    def update(self, request, pk, *args, **kwargs):
         """
         Update capsule data by contributors or creator not members.
         """
@@ -75,10 +90,25 @@ class CapsuleViewSet(ModelViewSet):
             return Response(
                 {"Capsule": "Capsule does not exist"}, status=status.HTTP_404_NOT_FOUND
             )
-        serializer = CapsuleUpdateSerializer(capsule)
-
+        # NOTE: This update() previously built the serializer from the instance
+        # only (CapsuleUpdateSerializer(capsule)), so is_valid()/save() were
+        # never called and the capsule was never persisted. FIXED: it now passes
+        # request.data through validation and actually saves the changes.
         if request.user == capsule.creator or request.user in capsule.contributor.all():
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = CapsuleUpdateSerializer(
+                capsule,
+                data=request.data,
+                partial=kwargs.get("partial", False),
+            )
+            if serializer.is_valid():
+                serializer.save()
+                record_capsule_event(
+                    capsule,
+                    CapsuleAuditLog.Event.UPDATED,
+                    actor=request.user,
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             {"message": "Cannot access this capsule"},
             status=status.HTTP_401_UNAUTHORIZED,
@@ -104,8 +134,44 @@ class CapsuleViewSet(ModelViewSet):
         )
         if serializer.is_valid():
             serializer.save(creator=request.user, capsule=capsule)
+            record_capsule_event(
+                capsule,
+                CapsuleAuditLog.Event.LOG_ADDED,
+                actor=request.user,
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="audit-logs",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def audit_logs(self, request, pk):
+        """
+        Read a capsule's audit trail. Only the creator or contributors may view it.
+        """
+        try:
+            capsule = capsule_db.objects.get(id=pk)
+        except capsule_db.DoesNotExist:
+            return Response(
+                {"Capsule": "Capsule does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if (
+            request.user != capsule.creator
+            and request.user not in capsule.contributor.all()
+        ):
+            return Response(
+                {"message": "Cannot access this capsule"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        entries = CapsuleAuditLog.objects.filter(capsule=capsule)
+        serializer = CapsuleAuditLogSerializer(entries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=True,
