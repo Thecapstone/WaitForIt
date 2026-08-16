@@ -3,7 +3,6 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("authentication", "0006_remove_sessions_payload_data_and_more"),
     ]
