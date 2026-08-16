@@ -1,8 +1,8 @@
-from datetime import datetime
 import logging
 import os
 
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 # from helpers import STREAM, redis_client
@@ -11,7 +11,6 @@ from helpers.cloudinaryUtils import (
     _generate_teaser_file,
     _save_upload_to_temp,
     _upload_cloudinary_resource,
-    get_default_expiry,
 )
 from inference.dispatcher import dispatch_log_created
 from memories.models import Capsule, Images, Logs, Teasers, Videos
@@ -23,14 +22,13 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
     private = serializers.BooleanField(
         default=True, help_text="Restrict other users from view this profile"
     )
-    maturity_date = serializers.DateTimeField(
-        default=get_default_expiry, help_text="Time to open capsule"
-    )
+
     creator = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Capsule
         fields = [
+            "id",
             "title",
             "description",
             "creator",
@@ -38,6 +36,28 @@ class CapsuleCreationSerializer(serializers.ModelSerializer):
             "maturity_date",
             "private",
         ]
+        read_only_fields = ["id"]
+
+    def validate_title(self, value):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated:
+            exists = Capsule.objects.filter(
+                creator=user,
+                title__iexact=value.strip(),
+            ).exists()
+            if exists:
+                raise serializers.ValidationError(
+                    "Capsule with this name already exists."
+                )
+        return value.strip()
+
+    def validate_maturity_date(self, value):
+        if value <= timezone.now():
+            raise serializers.ValidationError(
+                "Maturity date must be a future ISO 8601 datetime."
+            )
+        return value
 
 
 class LogCreationSerializer(serializers.ModelSerializer):
@@ -76,7 +96,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
         temp_paths = []
 
         with transaction.atomic():
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
             log_stamp = f"initial_log_{user.id}_{timestamp}"
             # image_link = cloudinary.utils.cloudinary_url("image_public_id")
             # video_link = cloudinary.utils.cloudinary_url("video_public_id")
@@ -130,6 +150,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
 
                         Teasers.objects.create(
                             video=video_obj,
+                            capsule=log.capsule,
                             teaser_url=teaser_upload.get("secure_url")
                             or teaser_upload.get("url"),
                         )
@@ -190,6 +211,7 @@ class CapsuleViewSerializer(serializers.ModelSerializer):
             "members",
             "logs",
             "description",
+            "maturity_date",
             "created_at",
             "private",
         ]

@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+import auto_prefetch
 from django.db import models
 from django.utils import timezone
 
@@ -29,16 +30,22 @@ class Capsule(UniqueUserId):
     )
     previous_article = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta(auto_prefetch.Model.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                fields=["creator", "title"],
+                name="unique_capsule_title_per_creator",
+            )
+        ]
 
     @property
     def is_private(self):
         return self.private
 
     def is_open(self):
-        if self.maturity_date <= timezone.now():
-            return True
-        return False
+        return self.maturity_date <= timezone.now()
 
     def __repr__(self):
         return f"{self.title} is a private: {self.is_private}, capsule"
@@ -59,7 +66,7 @@ class Logs(UniqueUserId):
     code_framework = models.CharField(max_length=80, blank=True)
     is_generated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Videos(UniqueUserId):
@@ -71,7 +78,7 @@ class Videos(UniqueUserId):
     video_file = models.URLField(max_length=512, blank=True)
     teaser = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def use_for_teaser_generation(self):
@@ -86,7 +93,7 @@ class Images(UniqueUserId):
     image_title = models.CharField(max_length=100)
     image_file = models.URLField(max_length=512, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Teasers(UniqueUserId):
@@ -98,7 +105,7 @@ class Teasers(UniqueUserId):
     )
     teaser_url = models.URLField(max_length=512, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Tag(models.Model):
