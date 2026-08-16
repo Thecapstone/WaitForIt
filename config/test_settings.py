@@ -11,20 +11,23 @@ class DisableMigrations:
         return None
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-        "TEST": {
-            "NAME": BASE_DIR / ".pytest.sqlite3",
-        },
-        "CONN_MAX_AGE": 0,
-        "CONN_HEALTH_CHECKS": False,
-        "OPTIONS": {
-            "timeout": 20,
-        },
+USE_REAL_DATABASE_FOR_TESTS = env.bool("USE_REAL_DATABASE_FOR_TESTS", default=False)
+
+if not USE_REAL_DATABASE_FOR_TESTS:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+            "TEST": {
+                "NAME": BASE_DIR / ".pytest.sqlite3",
+            },
+            "CONN_MAX_AGE": 0,
+            "CONN_HEALTH_CHECKS": False,
+            "OPTIONS": {
+                "timeout": 20,
+            },
+        }
     }
-}
 
 MIGRATION_MODULES = DisableMigrations()
 
