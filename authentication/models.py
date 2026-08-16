@@ -12,6 +12,12 @@ from authentication.managers import UserManager
 # Create your models here.
 
 
+def ensure_aware_datetime(value):
+    if timezone.is_naive(value):
+        return timezone.make_aware(value, timezone.get_current_timezone())
+    return value
+
+
 class User(AbstractUser):
     class Roles(models.TextChoices):
         USER = "user", "Regular User"
@@ -56,6 +62,7 @@ class Sessions(models.Model):
     session_version = models.IntegerField(default=0)
     last_ip = models.TextField()
     last_active = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class PasswordResetToken(models.Model):
@@ -73,7 +80,7 @@ class PasswordResetToken(models.Model):
 
     @property
     def is_expired(self):
-        return timezone.now() >= self.expires_at
+        return timezone.now() >= ensure_aware_datetime(self.expires_at)
 
 
 class EmailVerificationToken(models.Model):
@@ -91,4 +98,4 @@ class EmailVerificationToken(models.Model):
 
     @property
     def is_expired(self):
-        return timezone.now() >= self.expires_at
+        return timezone.now() >= ensure_aware_datetime(self.expires_at)

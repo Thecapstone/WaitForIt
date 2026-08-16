@@ -2,7 +2,6 @@
 
 from datetime import timedelta
 import hashlib
-import os
 from tokenize import TokenError
 from typing import Any
 from uuid import uuid4
@@ -16,6 +15,7 @@ from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -31,6 +31,17 @@ from authentication.serializers import (
     UserCreateSerializer,
     UserLoginSerializer,
 )
+from authentication.session_cache import (
+    LOGIN_ATTEMPT_LIMIT,
+    cache_session,
+    clear_cached_session,
+    clear_failed_login,
+    decode_session_user_id,
+    failed_login_count,
+    get_active_session,
+    login_lockout_ttl,
+    record_failed_login,
+)
 from authentication.tokens import (
     HasBootstrapToken,
     TokenTypes,
@@ -41,8 +52,7 @@ from authentication.tokens import (
     verify_verification_token,
 )
 from helpers.emailClient import send_password_reset_email, send_user_verification_email
-
-Host = os.getenv("HOST")
+from helpers.idempotency import cached_response, remember_response, request_fingerprint
 
 
 class AuthViewSet(GenericViewSet):
@@ -205,15 +215,57 @@ class AuthViewSet(GenericViewSet):
     )
     def user_login(self, request):
         """Authenticate user credentials and set secure HTTP-only cookies."""
+        email = request.data.get("email", "").strip().lower()
+        if email and failed_login_count(email) >= LOGIN_ATTEMPT_LIMIT:
+            retry_after = login_lockout_ttl(email)
+            return Response(
+                {
+                    "message": (
+                        "Too many failed login attempts. Try again in 15 minutes "
+                        "or reset your password."
+                    ),
+                    "retry_after_seconds": retry_after,
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        idempotency_key = request_fingerprint(request, "auth-login")
+        cached = cached_response(idempotency_key)
+        if cached:
+            cookies = cached.data.get("cookies", {})
+            response = Response(cached.data["body"], status=cached.status_code)
+            for key, val in cookies.items():
+                response.set_cookie(
+                    key=key,
+                    value=val,
+                    httponly=True,
+                    secure=True,
+                    samesite="Strict",
+                )
+            return response
+
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as exc:
+            if email:
+                attempts = record_failed_login(email)
+                if attempts >= LOGIN_ATTEMPT_LIMIT:
+                    return Response(
+                        {
+                            "message": (
+                                "Too many failed login attempts. Try again in 15 minutes "
+                                "or reset your password."
+                            )
+                        },
+                        status=status.HTTP_429_TOO_MANY_REQUESTS,
+                    )
+            raise exc
 
         validated_data: dict[str, Any] = serializer.validated_data  # type: ignore[index]
         user = validated_data["user"]
         role = user.role
-
-        user.is_active = True
-        user.save()
+        clear_failed_login(user.email)
 
         if not user.is_verified:
             can_send = (
@@ -257,14 +309,19 @@ class AuthViewSet(GenericViewSet):
 
         # pylint: disable=no-member
         user_session, _created = session_db.objects.get_or_create(
-            user_id=user, defaults={"session_version": 0}
+            user_id=user,
+            defaults={
+                "session_token": "",
+                "device_fingerprint": "",
+                "last_ip": "",
+                "session_version": 0,
+            },
         )
 
         user_session.session_version = F("session_version") + 1
         user_session.save(update_fields=["session_version"])
+        user_session.refresh_from_db(fields=["session_version", "created_at"])
         refresh = session_token(user.pk, role, user_session.session_version, request)
-        access = access_token(refresh)
-
         user_session.session_token = refresh
         user_session.device_fingerprint = fingerprint
         user_session.last_ip = ip_address
@@ -277,20 +334,63 @@ class AuthViewSet(GenericViewSet):
                 "last_active",
             ]
         )
+        cache_session(user_session)
+        access = access_token(refresh)
 
+        body = {"user": UserLoginSerializer(user).data}
+        cookies = {
+            "access_token": access,
+            "refresh_token": str(refresh),
+            "fingerprint": user_session.device_fingerprint,
+        }
         response = Response(
-            {"user": UserLoginSerializer(user).data},
+            body,
             status=status.HTTP_200_OK,
         )
-        for key, val in [
-            ("access_token", access),
-            ("refresh_token", str(refresh)),
-            ("fingerprint", user_session.device_fingerprint),
-        ]:
+        for key, val in cookies.items():
             response.set_cookie(
                 key=key, value=val, httponly=True, secure=True, samesite="Strict"
             )
+        remember_response(
+            idempotency_key,
+            Response({"body": body, "cookies": cookies}, status=status.HTTP_200_OK),
+        )
 
+        return response
+
+    @action(
+        detail=False,
+        methods=["POST"],
+        url_path="rotate-access-token",
+        permission_classes=[permissions.AllowAny],
+    )
+    def rotate_access_token(self, request):
+        """Issue a fresh access token from the active session token cookie."""
+        refresh = request.COOKIES.get("refresh_token")
+        if not refresh:
+            return Response(
+                {"message": "Active session token is required."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            user_id = decode_session_user_id(refresh)
+            get_active_session(user_id, refresh)
+            access = access_token(refresh)
+        except Exception as exc:
+            return Response({"message": str(exc)}, status=status.HTTP_401_UNAUTHORIZED)
+
+        response = Response(
+            {"message": "Access token rotated."},
+            status=status.HTTP_200_OK,
+        )
+        response.set_cookie(
+            key="access_token",
+            value=access,
+            httponly=True,
+            secure=True,
+            samesite="Strict",
+        )
         return response
 
     @action(
@@ -301,6 +401,13 @@ class AuthViewSet(GenericViewSet):
     )
     def user_logout(self, request):
         """Blacklist refresh token and nullify active user session database tracks."""
+        idempotency_key = request_fingerprint(request, "auth-logout")
+        cached = cached_response(idempotency_key)
+        if cached:
+            for key in ["access_token", "refresh_token", "fingerprint"]:
+                cached.delete_cookie(key)
+            return cached
+
         refresh_token = request.COOKIES.get("refresh_token")
         if refresh_token:
             try:
@@ -308,29 +415,38 @@ class AuthViewSet(GenericViewSet):
                 refresh.blacklist()
 
                 user = request.user
-                user.is_authenticated = False
-                user.save()
 
                 # pylint: disable=no-member
-                user_session = session_db.objects.get(user_id=user.id)
+                user_session = session_db.objects.get(user_id=user)
                 user_session.session_token = ""
                 user_session.last_ip = ""
                 user_session.session_version += 1
-                user_session.payload_data = ""
                 user_session.device_fingerprint = ""
                 user_session.last_active = timezone.now()
-                user_session.save()
+                user_session.save(
+                    update_fields=[
+                        "session_token",
+                        "last_ip",
+                        "session_version",
+                        "device_fingerprint",
+                        "last_active",
+                    ]
+                )
+                clear_cached_session(user.id)
             except TokenError:
                 return Response(
                     {"error": "Refresh token not provided"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+            except session_db.DoesNotExist:
+                pass
 
         response = Response(
             {"message": "You have been logged out"}, status=status.HTTP_200_OK
         )
         for key in ["access_token", "refresh_token", "fingerprint"]:
             response.delete_cookie(key)
+        remember_response(idempotency_key, response)
         return response
 
     @extend_schema(
@@ -359,7 +475,8 @@ class AuthViewSet(GenericViewSet):
                 expiry,
                 token_type=TokenTypes["PASSWORD"],
             )
-            reset_link = f"{Host}/api/auth/password-reset/{token}/"
+            reset_path = f"/api/auth/password-reset/{token}/"
+            reset_link = request.build_absolute_uri(reset_path)
 
             try:
                 send_password_reset_email(

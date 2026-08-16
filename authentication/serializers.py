@@ -1,6 +1,5 @@
 """Serializers for user registration, authentication, and password management."""
 
-from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer
 
@@ -60,18 +59,27 @@ class CreateAdminSerializer(ModelSerializer):
 
 
 class UserLoginSerializer(Serializer):
-    """User login serializer, validates user active status."""
+    """User login serializer, validates user credentials."""
 
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        """Authenticate user credentials against the Django backend."""
-        user = authenticate(username=attrs["email"], password=attrs["password"])
-        if user and user.is_active:
-            attrs["user"] = user
-            return attrs
-        raise serializers.ValidationError("Invalid credentials")
+        """Validate user credentials."""
+
+        email = attrs["email"].strip().lower()
+        password = attrs["password"]
+
+        try:
+            user = user_db.objects.get(email=email)
+        except user_db.DoesNotExist as exc:
+            raise serializers.ValidationError("Invalid credentials") from exc
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Invalid credentials")
+
+        attrs["user"] = user
+        return attrs
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
