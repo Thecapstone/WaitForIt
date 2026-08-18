@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 import jwt
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
@@ -52,10 +53,13 @@ def _parse_datetime(value):
     if not value:
         return None
     if hasattr(value, "tzinfo"):
-        return value
-    parsed = timezone.datetime.fromisoformat(str(value))
+        parsed = value
+    else:
+        parsed = parse_datetime(str(value))
+        if parsed is None:
+            raise ValueError(f"Invalid cached datetime: {value!r}")
     if timezone.is_naive(parsed):
-        parsed = timezone.make_aware(parsed, timezone.UTC)
+        parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
     return parsed
 
 
@@ -64,34 +68,38 @@ def get_active_session(user_id: int | str, token: str | None = None) -> Sessions
     cached = cache.get(session_cache_key(user_id))
 
     if cached:
-        last_active = _parse_datetime(cached.get("last_active"))
-        created_at = _parse_datetime(cached.get("created_at"))
-        if token and cached.get("session_token") != token:
-            raise AuthenticationFailed("Session token has been revoked.")
-        if last_active and now - last_active > SESSION_IDLE_TIMEOUT:
-            invalidate_session(user_id)
-            raise AuthenticationFailed("Session expired after 7 days of inactivity.")
-        if created_at and now - created_at > SESSION_ABSOLUTE_TIMEOUT:
-            invalidate_session(user_id)
-            raise AuthenticationFailed("Session expired after 30 days.")
+        try:
+            last_active = _parse_datetime(cached.get("last_active"))
+            created_at = _parse_datetime(cached.get("created_at"))
+        except (TypeError, ValueError):
+            clear_cached_session(user_id)
+        else:
+            if token and cached.get("session_token") != token:
+                raise AuthenticationFailed("Session token has been revoked.")
+            if last_active and now - last_active > SESSION_IDLE_TIMEOUT:
+                invalidate_session(user_id)
+                raise AuthenticationFailed("Session expired after 7 days of inactivity.")
+            if created_at and now - created_at > SESSION_ABSOLUTE_TIMEOUT:
+                invalidate_session(user_id)
+                raise AuthenticationFailed("Session expired after 30 days.")
 
-        Sessions.objects.filter(id=cached["id"]).update(last_active=now)
-        cached["last_active"] = now.isoformat()
-        cache.set(
-            session_cache_key(user_id),
-            cached,
-            timeout=int(SESSION_ABSOLUTE_TIMEOUT.total_seconds()),
-        )
-        return Sessions(
-            id=cached["id"],
-            user_id_id=cached["user_id"],
-            session_token=cached["session_token"],
-            session_version=cached["session_version"],
-            device_fingerprint=cached["device_fingerprint"],
-            last_ip=cached["last_ip"],
-            last_active=now,
-            created_at=created_at,
-        )
+            Sessions.objects.filter(id=cached["id"]).update(last_active=now)
+            cached["last_active"] = now.isoformat()
+            cache.set(
+                session_cache_key(user_id),
+                cached,
+                timeout=int(SESSION_ABSOLUTE_TIMEOUT.total_seconds()),
+            )
+            return Sessions(
+                id=cached["id"],
+                user_id_id=cached["user_id"],
+                session_token=cached["session_token"],
+                session_version=cached["session_version"],
+                device_fingerprint=cached["device_fingerprint"],
+                last_ip=cached["last_ip"],
+                last_active=now,
+                created_at=created_at,
+            )
 
     try:
         session = Sessions.objects.get(user_id_id=user_id)
