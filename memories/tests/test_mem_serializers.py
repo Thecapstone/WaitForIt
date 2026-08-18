@@ -3,6 +3,7 @@
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 import pytest
+from rest_framework.renderers import HTMLFormRenderer
 from rest_framework.test import APIRequestFactory
 
 from authentication.models import User
@@ -79,6 +80,13 @@ def video_file():
 
 
 class TestCapsuleCreationSerializer:
+    def test_serializer_renders_browsable_api_form_with_blank_maturity_date(self):
+        data = type("RenderedData", (), {"serializer": CapsuleCreationSerializer()})()
+
+        rendered_form = HTMLFormRenderer().render(data)
+
+        assert "maturity_date" in rendered_form
+
     def test_serializer_is_valid(self, serializer_context):
         serializer = CapsuleCreationSerializer(
             data={
