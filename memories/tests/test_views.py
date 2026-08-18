@@ -59,7 +59,7 @@ def capsule_url(capsule_id):
 
 
 def capsule_events(capsule):
-    return list(capsule.audit_logs.values_list("event", flat=True))
+    return list(capsule.audit_logs.values_list("action", flat=True))
 
 
 class TestCreateCapsule:
@@ -181,8 +181,24 @@ class TestAuditLogsEndpoint:
         response = api_client.get(audit_logs_url(capsule.id))
 
         assert response.status_code == 200, response.data
-        events = [entry["event"] for entry in response.data]
-        assert events == ["LOG_ADDED", "VIEWED"]
+        actions = [entry["action"] for entry in response.data]
+        assert actions == ["LOG_ADDED", "VIEWED"]
+
+    def test_audit_entries_carry_entity_and_metadata(
+        self, api_client, creator, capsule
+    ):
+        api_client.force_authenticate(user=creator)
+        api_client.post(create_log_url(capsule.id), valid_log_payload())
+
+        response = api_client.get(audit_logs_url(capsule.id))
+
+        assert response.status_code == 200, response.data
+        log_added = next(e for e in response.data if e["action"] == "LOG_ADDED")
+        assert log_added["entity_type"] == "log"
+        assert log_added["entity_id"] == Logs.objects.get(capsule=capsule).id
+        assert log_added["metadata"]["capsule_id"] == capsule.id
+        assert log_added["metadata"]["actor_id"] == creator.id
+        assert "actioned_at" in log_added["metadata"]
 
     def test_forbidden_user_cannot_read(self, api_client, outsider, capsule):
         api_client.force_authenticate(user=outsider)

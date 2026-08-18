@@ -81,6 +81,9 @@ def test_generate_article_sync_creates_one_article_for_log_batch(
     assert article.tags == Tag.objects.get(name="daily-development")
     capsule.refresh_from_db()
     assert capsule.previous_article == "Generated article"
-    assert capsule.audit_logs.filter(
-        event=CapsuleAuditLog.Event.ARTICLE_GENERATED
-    ).exists()
+    audit = capsule.audit_logs.get(action=CapsuleAuditLog.Action.ARTICLE_GENERATED)
+    assert audit.actor is None
+    assert audit.entity_type == CapsuleAuditLog.EntityType.ARTICLE
+    assert audit.entity_id == article.id
+    assert audit.metadata["article_id"] == article.id
+    assert set(audit.metadata["source_logs"]) == {log.id for log in logs}

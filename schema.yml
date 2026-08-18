@@ -390,7 +390,7 @@ paths:
           description: No response body
   /api/memories/{id}/audit-logs/:
     get:
-      operationId: memories_audit_logs_retrieve
+      operationId: memories_audit_logs_list
       description: Read a capsule's audit trail. Only the creator or contributors
         may view it.
       parameters:
@@ -409,7 +409,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CapsuleCreation'
+                type: array
+                items:
+                  $ref: '#/components/schemas/CapsuleAuditLog'
           description: ''
   /api/memories/{id}/create-log/:
     post:
@@ -548,6 +550,58 @@ paths:
           description: ''
 components:
   schemas:
+    ActionEnum:
+      enum:
+      - CREATED
+      - VIEWED
+      - UPDATED
+      - LOG_ADDED
+      - ARTICLE_GENERATED
+      - MEMBER_ADDED
+      - MEMBER_REMOVED
+      - CONTRIBUTOR_ADDED
+      - CONTRIBUTOR_REMOVED
+      type: string
+      description: |-
+        * `CREATED` - Capsule created
+        * `VIEWED` - Capsule viewed
+        * `UPDATED` - Capsule updated
+        * `LOG_ADDED` - Log added to capsule
+        * `ARTICLE_GENERATED` - Article generated for capsule
+        * `MEMBER_ADDED` - Member added to capsule
+        * `MEMBER_REMOVED` - Member removed from capsule
+        * `CONTRIBUTOR_ADDED` - Contributor added to capsule
+        * `CONTRIBUTOR_REMOVED` - Contributor removed from capsule
+    CapsuleAuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: unique id generator for anonymous usernames
+        action:
+          $ref: '#/components/schemas/ActionEnum'
+        entity_type:
+          $ref: '#/components/schemas/EntityTypeEnum'
+        entity_id:
+          type: string
+          maxLength: 120
+        actor:
+          type: string
+          readOnly: true
+          nullable: true
+        metadata: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - action
+      - actor
+      - created_at
+      - entity_id
+      - entity_type
+      - id
     CapsuleCreation:
       type: object
       properties:
@@ -586,6 +640,18 @@ components:
       required:
       - email
       - password
+    EntityTypeEnum:
+      enum:
+      - capsule
+      - log
+      - article
+      - user
+      type: string
+      description: |-
+        * `capsule` - Capsule
+        * `log` - Log
+        * `article` - Article
+        * `user` - User
     ForgotPassword:
       type: object
       properties:

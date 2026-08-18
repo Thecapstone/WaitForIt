@@ -64,7 +64,7 @@ class Logs(UniqueUserId):
 
 
 class CapsuleAuditLog(UniqueUserId):
-    class Event(models.TextChoices):
+    class Action(models.TextChoices):
         CREATED = "CREATED", "Capsule created"
         VIEWED = "VIEWED", "Capsule viewed"
         UPDATED = "UPDATED", "Capsule updated"
@@ -75,8 +75,17 @@ class CapsuleAuditLog(UniqueUserId):
         CONTRIBUTOR_ADDED = "CONTRIBUTOR_ADDED", "Contributor added to capsule"
         CONTRIBUTOR_REMOVED = "CONTRIBUTOR_REMOVED", "Contributor removed from capsule"
 
+    class EntityType(models.TextChoices):
+        CAPSULE = "capsule", "Capsule"
+        LOG = "log", "Log"
+        ARTICLE = "article", "Article"
+        USER = "user", "User"
+
     capsule = models.ForeignKey(
-        Capsule, on_delete=models.CASCADE, related_name="audit_logs"
+        Capsule,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        related_name="audit_logs",
     )
     actor = models.ForeignKey(
         "authentication.User",
@@ -85,13 +94,16 @@ class CapsuleAuditLog(UniqueUserId):
         blank=True,
         related_name="capsule_audit_logs",
     )
-    event = models.CharField(max_length=32, choices=Event.choices)
+    action = models.CharField(max_length=32, choices=Action.choices)
+    entity_type = models.CharField(max_length=32, choices=EntityType.choices)
+    entity_id = models.CharField(max_length=120)
     metadata = models.JSONField(default=dict, blank=True)
 
     class Meta(auto_prefetch.Model.Meta):  # type: ignore[reportIncompatibleVariableOverride]
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["capsule", "created_at"]),
+            models.Index(fields=["entity_type", "entity_id"]),
         ]
 
 

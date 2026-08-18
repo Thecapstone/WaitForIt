@@ -61,7 +61,13 @@ class InferenceService:
 
         record_capsule_event(
             context.capsule,
-            CapsuleAuditLog.Event.ARTICLE_GENERATED,
+            CapsuleAuditLog.Action.ARTICLE_GENERATED,
+            entity_type=CapsuleAuditLog.EntityType.ARTICLE,
+            entity_id=article.id,
+            metadata={
+                "article_id": article.id,
+                "source_logs": [str(log.id) for log in context.logs],
+            },
         )
 
         return article

@@ -1,5 +1,6 @@
 import logging
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -40,7 +41,9 @@ class CapsuleViewSet(ModelViewSet):
             capsule: Capsule = serializer.save(creator=request.user)
             record_capsule_event(
                 capsule,
-                CapsuleAuditLog.Event.CREATED,
+                CapsuleAuditLog.Action.CREATED,
+                entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+                entity_id=capsule.id,
                 actor=request.user,
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -69,7 +72,9 @@ class CapsuleViewSet(ModelViewSet):
             )
         record_capsule_event(
             capsule,
-            CapsuleAuditLog.Event.VIEWED,
+            CapsuleAuditLog.Action.VIEWED,
+            entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+            entity_id=capsule.id,
             actor=request.user,
         )
         return Response(
@@ -104,7 +109,9 @@ class CapsuleViewSet(ModelViewSet):
                 serializer.save()
                 record_capsule_event(
                     capsule,
-                    CapsuleAuditLog.Event.UPDATED,
+                    CapsuleAuditLog.Action.UPDATED,
+                    entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+                    entity_id=capsule.id,
                     actor=request.user,
                 )
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -133,15 +140,18 @@ class CapsuleViewSet(ModelViewSet):
             context={"request": request},
         )
         if serializer.is_valid():
-            serializer.save(creator=request.user, capsule=capsule)
+            log = serializer.save(creator=request.user, capsule=capsule)
             record_capsule_event(
                 capsule,
-                CapsuleAuditLog.Event.LOG_ADDED,
+                CapsuleAuditLog.Action.LOG_ADDED,
+                entity_type=CapsuleAuditLog.EntityType.LOG,
+                entity_id=log.id,
                 actor=request.user,
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(responses=CapsuleAuditLogSerializer(many=True))
     @action(
         detail=True,
         methods=["get"],

@@ -31,7 +31,15 @@ class CapsuleAuditLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CapsuleAuditLog
-        fields = ["id", "event", "actor", "metadata", "created_at"]
+        fields = [
+            "id",
+            "action",
+            "entity_type",
+            "entity_id",
+            "actor",
+            "metadata",
+            "created_at",
+        ]
 
 
 class CapsuleCreationSerializer(serializers.ModelSerializer):

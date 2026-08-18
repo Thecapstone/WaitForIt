@@ -28,43 +28,65 @@ class TestCapsuleAuditLogModel:
     def test_creates_audit_entry_with_actor(self, capsule, creator):
         entry = record_capsule_event(
             capsule,
-            CapsuleAuditLog.Event.CREATED,
+            CapsuleAuditLog.Action.CREATED,
+            entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+            entity_id=capsule.id,
             actor=creator,
         )
 
         assert entry.capsule == capsule
         assert entry.actor == creator
-        assert entry.event == CapsuleAuditLog.Event.CREATED
-        assert entry.metadata == {}
+        assert entry.action == CapsuleAuditLog.Action.CREATED
+        assert entry.entity_type == CapsuleAuditLog.EntityType.CAPSULE
+        assert entry.entity_id == capsule.id
 
     def test_actor_is_nullable_for_system_events(self, capsule):
         entry = record_capsule_event(
             capsule,
-            CapsuleAuditLog.Event.ARTICLE_GENERATED,
+            CapsuleAuditLog.Action.ARTICLE_GENERATED,
+            entity_type=CapsuleAuditLog.EntityType.ARTICLE,
+            entity_id="article-1",
         )
 
         assert entry.actor is None
-        assert entry.event == CapsuleAuditLog.Event.ARTICLE_GENERATED
+        assert entry.action == CapsuleAuditLog.Action.ARTICLE_GENERATED
 
-    def test_metadata_captured(self, capsule, creator):
+    def test_metadata_is_auto_enriched(self, capsule, creator):
         entry = record_capsule_event(
             capsule,
-            CapsuleAuditLog.Event.UPDATED,
+            CapsuleAuditLog.Action.UPDATED,
+            entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+            entity_id=capsule.id,
             actor=creator,
             metadata={"field": "title"},
         )
 
-        assert entry.metadata == {"field": "title"}
+        assert entry.metadata["capsule_id"] == capsule.id
+        assert entry.metadata["actor_id"] == creator.id
+        assert entry.metadata["field"] == "title"
+        assert "actioned_at" in entry.metadata
 
     def test_events_ordered_newest_first(self, capsule, creator):
-        record_capsule_event(capsule, CapsuleAuditLog.Event.CREATED, actor=creator)
-        record_capsule_event(capsule, CapsuleAuditLog.Event.VIEWED, actor=creator)
+        record_capsule_event(
+            capsule,
+            CapsuleAuditLog.Action.CREATED,
+            entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+            entity_id=capsule.id,
+            actor=creator,
+        )
+        record_capsule_event(
+            capsule,
+            CapsuleAuditLog.Action.VIEWED,
+            entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+            entity_id=capsule.id,
+            actor=creator,
+        )
 
         latest = capsule.audit_logs.first()
 
-        assert latest.event == CapsuleAuditLog.Event.VIEWED
+        assert latest.action == CapsuleAuditLog.Action.VIEWED
 
-    def test_all_expected_event_choices_exist(self):
+    def test_all_expected_action_choices_exist(self):
         expected = {
             "CREATED",
             "VIEWED",
@@ -77,4 +99,25 @@ class TestCapsuleAuditLogModel:
             "CONTRIBUTOR_REMOVED",
         }
 
-        assert set(CapsuleAuditLog.Event.values) == expected
+        assert set(CapsuleAuditLog.Action.values) == expected
+
+    def test_all_expected_entity_types_exist(self):
+        expected = {"capsule", "log", "article", "user"}
+
+        assert set(CapsuleAuditLog.EntityType.values) == expected
+
+    def test_deleting_capsule_does_not_delete_audit_rows(self, capsule, creator):
+        record_capsule_event(
+            capsule,
+            CapsuleAuditLog.Action.CREATED,
+            entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+            entity_id=capsule.id,
+            actor=creator,
+        )
+        capsule_id = capsule.id
+
+        capsule.delete()
+
+        assert CapsuleAuditLog.objects.count() == 1
+        remaining = CapsuleAuditLog.objects.first()
+        assert remaining.entity_id == capsule_id
