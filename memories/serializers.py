@@ -16,6 +16,7 @@ from inference.dispatcher import dispatch_log_created
 from memories.models import (
     Articles,
     Capsule,
+    CapsuleAuditLog,
     Images,
     Logs,
     Teasers,
@@ -28,6 +29,22 @@ logger = logging.getLogger("waitforit")
 
 def default_maturity_datetime_input():
     return get_default_expiry().isoformat()
+
+
+class CapsuleAuditLogSerializer(serializers.ModelSerializer):
+    actor = serializers.StringRelatedField(allow_null=True)
+
+    class Meta:
+        model = CapsuleAuditLog
+        fields = [
+            "id",
+            "action",
+            "entity_type",
+            "entity_id",
+            "actor",
+            "metadata",
+            "created_at",
+        ]
 
 
 class CapsuleCreationSerializer(serializers.ModelSerializer):

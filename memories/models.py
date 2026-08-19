@@ -69,6 +69,50 @@ class Logs(UniqueUserId):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class CapsuleAuditLog(UniqueUserId):
+    class Action(models.TextChoices):
+        CREATED = "CREATED", "Capsule created"
+        VIEWED = "VIEWED", "Capsule viewed"
+        UPDATED = "UPDATED", "Capsule updated"
+        LOG_ADDED = "LOG_ADDED", "Log added to capsule"
+        ARTICLE_GENERATED = "ARTICLE_GENERATED", "Article generated for capsule"
+        MEMBER_ADDED = "MEMBER_ADDED", "Member added to capsule"
+        MEMBER_REMOVED = "MEMBER_REMOVED", "Member removed from capsule"
+        CONTRIBUTOR_ADDED = "CONTRIBUTOR_ADDED", "Contributor added to capsule"
+        CONTRIBUTOR_REMOVED = "CONTRIBUTOR_REMOVED", "Contributor removed from capsule"
+
+    class EntityType(models.TextChoices):
+        CAPSULE = "capsule", "Capsule"
+        LOG = "log", "Log"
+        ARTICLE = "article", "Article"
+        USER = "user", "User"
+
+    capsule = models.ForeignKey(
+        Capsule,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        related_name="audit_logs",
+    )
+    actor = models.ForeignKey(
+        "authentication.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="capsule_audit_logs",
+    )
+    action = models.CharField(max_length=32, choices=Action.choices)
+    entity_type = models.CharField(max_length=32, choices=EntityType.choices)
+    entity_id = models.CharField(max_length=120)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta(auto_prefetch.Model.Meta):  # type: ignore[reportIncompatibleVariableOverride]
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["capsule", "created_at"]),
+            models.Index(fields=["entity_type", "entity_id"]),
+        ]
+
+
 class Videos(UniqueUserId):
     capsule = models.ForeignKey(
         Capsule, on_delete=models.CASCADE, related_name="videos"

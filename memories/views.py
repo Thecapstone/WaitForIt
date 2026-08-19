@@ -1,6 +1,7 @@
 import logging
 
 from django.db import IntegrityError
+from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,8 +10,10 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import ModelViewSet
 
 from helpers.idempotency import cached_response, remember_response, request_fingerprint
-from memories.models import Capsule as capsule_db, Logs as logs_db
+from memories.audit import record_capsule_event
+from memories.models import Capsule, Capsule as capsule_db, Logs as logs_db, CapsuleAuditLog
 from memories.serializers import (
+    CapsuleAuditLogSerializer,
     CapsuleCreationSerializer,
     CapsulePreviewSerializer,
     CapsuleUpdateSerializer,
@@ -108,6 +111,14 @@ class CapsuleViewSet(ModelViewSet):
         if serializer.is_valid():
             try:
                 serializer.save(creator=request.user)
+                capsule: Capsule = serializer.save(creator=request.user)
+                record_capsule_event(
+                    capsule,
+                    CapsuleAuditLog.Action.CREATED,
+                    entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+                    entity_id=capsule.id,
+                    actor=request.user,
+                )
             except IntegrityError:
                 return Response(
                     {"title": ["Capsule with this name already exists."]},
@@ -182,7 +193,22 @@ class CapsuleViewSet(ModelViewSet):
 
         user = request.user
         if user == capsule.creator or capsule.contributor.filter(id=user.id).exists():
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = CapsuleUpdateSerializer(
+                capsule,
+                data=request.data,
+                #partial=kwargs.get("partial", False),
+            )
+            if serializer.is_valid():
+                serializer.save()
+                record_capsule_event(
+                    capsule,
+                    CapsuleAuditLog.Action.UPDATED,
+                    entity_type=CapsuleAuditLog.EntityType.CAPSULE,
+                    entity_id=capsule.id,
+                    actor=request.user,
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return self._unauthorized_capsule_response()
 
     @action(
@@ -209,12 +235,51 @@ class CapsuleViewSet(ModelViewSet):
             context={"request": request},
         )
         if serializer.is_valid():
-            serializer.save(creator=request.user, capsule=capsule)
+            log = serializer.save(creator=request.user, capsule=capsule)
+            record_capsule_event(
+                capsule,
+                CapsuleAuditLog.Action.LOG_ADDED,
+                entity_type=CapsuleAuditLog.EntityType.LOG,
+                entity_id=log.id,
+                actor=request.user,
+            )
             return remember_response(
                 idempotency_key,
                 Response(serializer.data, status=status.HTTP_201_CREATED),
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(responses=CapsuleAuditLogSerializer(many=True))
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="audit-logs",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def audit_logs(self, request, pk):
+        """
+        Read a capsule's audit trail. Only the creator or contributors may view it.
+        """
+        try:
+            capsule = capsule_db.objects.get(id=pk)
+        except capsule_db.DoesNotExist:
+            return Response(
+                {"Capsule": "Capsule does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if (
+            request.user != capsule.creator
+            and request.user not in capsule.contributor.all()
+        ):
+            return Response(
+                {"message": "Cannot access this capsule"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        entries = CapsuleAuditLog.objects.filter(capsule=capsule)
+        serializer = CapsuleAuditLogSerializer(entries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=True,

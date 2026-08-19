@@ -157,8 +157,8 @@ CELERY_BEAT_SCHEDULE = {
     "generate-daily-articles": {
         "task": "inference.tasks.generate_daily_articles",
         "schedule": crontab(
-            hour=CELERY_DAILY_ARTICLE_HOUR,
-            minute=CELERY_DAILY_ARTICLE_MINUTE,
+            hour=str(CELERY_DAILY_ARTICLE_HOUR),  # converted type to str, fixes pylance errors, Celery treats both str and int the same
+            minute=str(CELERY_DAILY_ARTICLE_MINUTE),
         ),
     },
 }
