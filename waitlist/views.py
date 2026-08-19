@@ -56,8 +56,7 @@ class WaitListViewSet(viewsets.GenericViewSet):
     )
     def activity(self, request):
         activity = (
-            WaitList.objects
-            .annotate(signup_date=TruncDate("created_at"))
+            WaitList.objects.annotate(signup_date=TruncDate("created_at"))
             .values("signup_date")
             .annotate(signups=Count("id"))
             .order_by("signup_date")
@@ -86,8 +85,7 @@ class WaitListViewSet(viewsets.GenericViewSet):
         non_developers = WaitList.objects.filter(is_developer=False).count()
 
         role_breakdown = (
-            WaitList.objects
-            .values("role")
+            WaitList.objects.values("role")
             .annotate(count=Count("id"))
             .order_by("-count")
         )
@@ -346,20 +344,17 @@ class AnalyticsAPIView(APIView):
         non_developers = WaitList.objects.filter(is_developer=False).count()
 
         by_status = (
-            WaitList.objects
-            .values("status")
+            WaitList.objects.values("status")
             .annotate(count=Count("id"))
             .order_by("status")
         )
         by_role = (
-            WaitList.objects
-            .values("role")
+            WaitList.objects.values("role")
             .annotate(count=Count("id"))
             .order_by("-count")
         )
         email_statuses = (
-            EmailDeliveryLog.objects
-            .values("status")
+            EmailDeliveryLog.objects.values("status")
             .annotate(count=Count("id"))
             .order_by("status")
         )

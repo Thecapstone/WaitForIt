@@ -11,7 +11,12 @@ from rest_framework.viewsets import ModelViewSet
 
 from helpers.idempotency import cached_response, remember_response, request_fingerprint
 from memories.audit import record_capsule_event
-from memories.models import Capsule, Capsule as capsule_db, Logs as logs_db, CapsuleAuditLog
+from memories.models import (
+    Capsule,
+    Capsule as capsule_db,
+    CapsuleAuditLog,
+    Logs as logs_db,
+)
 from memories.serializers import (
     CapsuleAuditLogSerializer,
     CapsuleCreationSerializer,
@@ -196,7 +201,7 @@ class CapsuleViewSet(ModelViewSet):
             serializer = CapsuleUpdateSerializer(
                 capsule,
                 data=request.data,
-                #partial=kwargs.get("partial", False),
+                # partial=kwargs.get("partial", False),
             )
             if serializer.is_valid():
                 serializer.save()
