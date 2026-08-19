@@ -163,6 +163,26 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+LOG_FILE = BASE_DIR / "logs" / "django_errors.log"
+LOG_FILE_HANDLER = {
+    "class": "logging.FileHandler",
+    "filename": LOG_FILE,
+    "formatter": "standard",
+    "level": "WARNING",
+    "delay": True,
+}
+if os.name != "nt":
+    LOG_FILE_HANDLER = {
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "filename": LOG_FILE,
+        "formatter": "standard",
+        "level": "WARNING",
+        "when": "D",
+        "interval": 1,
+        "backupCount": 30,
+        "delay": True,
+    }
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -175,17 +195,7 @@ LOGGING = {
             "formatter": "standard",
             "level": "INFO",
         },
-        "file": {
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": BASE_DIR
-            / "logs"
-            / "django_errors.log",  # Saves to project root
-            "formatter": "standard",
-            "level": "WARNING",  # Only warnings and errors go to this file
-            "when": "D",  # "D" stands for Day (rotates at midnight daily)
-            "interval": 1,  # Every 1 day
-            "backupCount": 30,  # Keep 30 days worth of logs
-        },
+        "file": LOG_FILE_HANDLER,
     },
     # 3. Loggers: Channel-specific routing rules
     "loggers": {
