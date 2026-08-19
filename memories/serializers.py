@@ -13,12 +13,30 @@ from helpers.cloudinaryUtils import (
     _upload_cloudinary_resource,
 )
 from inference.dispatcher import dispatch_log_created
-from memories.models import Capsule, Images, Logs, Teasers, Videos
+from memories.models import (
+    Articles,
+    Capsule,
+    Images,
+    Logs,
+    Teasers,
+    Videos,
+    get_default_expiry,
+)
 
 logger = logging.getLogger("waitforit")
 
 
+def default_maturity_datetime_input():
+    return get_default_expiry().isoformat()
+
+
 class CapsuleCreationSerializer(serializers.ModelSerializer):
+    maturity_date = serializers.DateTimeField(
+        default=get_default_expiry,
+        initial=default_maturity_datetime_input,
+        required=False,
+        style={"input_type": "datetime-local"},
+    )
     private = serializers.BooleanField(
         default=True, help_text="Restrict other users from view this profile"
     )
@@ -184,7 +202,7 @@ class LogCreationSerializer(serializers.ModelSerializer):
                 _cleanup_cloudinary_resources(uploaded_resources)
                 logger.warning(
                     "CLOUDINARY_RESOURCE_UPLOAD_FAILED | request=%s | error=%s ",
-                    request.id,
+                    log.id,
                     exc,
                 )
                 raise exc
@@ -197,7 +215,62 @@ class LogCreationSerializer(serializers.ModelSerializer):
         return log
 
 
+class ImageViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Images
+        fields = ["id", "image_title", "image_file", "created_at"]
+
+
+class VideoViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Videos
+        fields = ["id", "video_title", "video_file", "teaser", "created_at"]
+
+
+class TeaserViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teasers
+        fields = ["id", "teaser_url", "created_at"]
+
+
+class ArticleViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Articles
+        fields = ["id", "title", "body", "image"]
+
+
+class LogViewSerializer(serializers.ModelSerializer):
+    images = ImageViewSerializer(many=True, read_only=True)
+    videos = VideoViewSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Logs
+        fields = ["id", "title", "description", "created_at", "images", "videos"]
+
+
+class CapsulePreviewSerializer(serializers.ModelSerializer):
+    articles = ArticleViewSerializer(many=True, read_only=True)
+    teasers = serializers.SerializerMethodField()
+
+    def get_teasers(self, obj):
+        return TeaserViewSerializer(obj.video_previews.all(), many=True).data
+
+    class Meta:
+        model = Capsule
+        fields = [
+            "id",
+            "title",
+            "description",
+            "maturity_date",
+            "private",
+            "articles",
+            "teasers",
+        ]
+
+
 class CapsuleViewSerializer(serializers.ModelSerializer):
+    articles = ArticleViewSerializer(many=True, read_only=True)
+    logs = LogViewSerializer(many=True, read_only=True)
     members = serializers.SerializerMethodField()
 
     def get_members(self, obj) -> int:
@@ -214,13 +287,8 @@ class CapsuleViewSerializer(serializers.ModelSerializer):
             "maturity_date",
             "created_at",
             "private",
+            "articles",
         ]
-
-
-class LogViewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Logs
-        fields = ["id", "title", "description", "created_at", "images", "videos"]
 
 
 class CapsuleUpdateSerializer(serializers.ModelSerializer):
@@ -230,25 +298,3 @@ class CapsuleUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Capsule
         fields = ["title", "description"]
-
-
-# class CapsulePreviewSerializer(serializers.ModelSerializer):
-#     teasers = serializers.SerializerMethodField()
-
-#     def get_teasers(self, obj):
-#         return [
-#             preview.teaser_url
-#             for preview in obj.capsule_previews.all()
-#             if preview.teaser_url
-#         ]
-
-#     def get(self, validated_data):
-#         request = self.context.get("request")
-#         capsule = request.capsule.id if request else None
-#         Articles.objects.get(capsule=capsule)
-#         Logs.objects.get(capsule=capsule)
-
-
-# class CapsuleJoinSerializer(serializers.Serializer):
-#     user_id = serializers.CharField()
-#     capsule_id = serializers.CharField()
