@@ -51,7 +51,12 @@ def send_verification_email(receiver_email, verification_link, verification_toke
     # 5. Establish secure connection and send the email
     context = ssl.create_default_context()
     try:
-        with smtplib.SMTP_SSL(smtp_server, port, context=context, timeout=10,) as server:
+        with smtplib.SMTP_SSL(
+            smtp_server,
+            port,
+            context=context,
+            timeout=10,
+        ) as server:
             server.login(sender_email, sender_password)
             server.sendmail(sender_email, receiver_email, message.as_string())
         print(f"Verification email sent successfully to {receiver_email}!")
@@ -97,7 +102,12 @@ def send_password_reset_email(receiver_email, reset_link, reset_token):
     # 5. Establish secure connection and send the email
     context = ssl.create_default_context()
     try:
-        with smtplib.SMTP_SSL(smtp_server, port, context=context, timeout=10,) as server:
+        with smtplib.SMTP_SSL(
+            smtp_server,
+            port,
+            context=context,
+            timeout=10,
+        ) as server:
             server.login(sender_email, sender_password)
             server.sendmail(sender_email, receiver_email, message.as_string())
         print(f"Password reset email sent successfully to {receiver_email}!")

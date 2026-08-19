@@ -78,7 +78,9 @@ def get_active_session(user_id: int | str, token: str | None = None) -> Sessions
                 raise AuthenticationFailed("Session token has been revoked.")
             if last_active and now - last_active > SESSION_IDLE_TIMEOUT:
                 invalidate_session(user_id)
-                raise AuthenticationFailed("Session expired after 7 days of inactivity.")
+                raise AuthenticationFailed(
+                    "Session expired after 7 days of inactivity."
+                )
             if created_at and now - created_at > SESSION_ABSOLUTE_TIMEOUT:
                 invalidate_session(user_id)
                 raise AuthenticationFailed("Session expired after 30 days.")
