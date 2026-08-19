@@ -103,7 +103,14 @@ class OpenRouterClient:
                 json=payload,
             )
 
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                error_detail = response.text[:1000]
+                raise RuntimeError(
+                    "OpenRouter request failed "
+                    f"with HTTP {response.status_code}: {error_detail}"
+                ) from exc
 
             data = response.json()
 
